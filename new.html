@@ -144,76 +144,21 @@
 
         .sidebar {
             position: fixed;
-            top: 90px;
-            left: 20px;
+            top: 0;
+            left: 0;
             width: 200px;
-            height: auto;
-            background: transparent;
+            height: 100%;
+            background: rgba(52, 58, 64, 0.9);
             color: #fff;
             padding: 20px;
-            box-shadow: none;
-            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            transform: translateX(-110%);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            transform: translateX(-100%);
             z-index: 1000;
         }
 
         .sidebar.active {
             transform: translateX(0);
-        }
-
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar li {
-            margin-bottom: 15px;
-            width: 100%;
-            text-align: center;
-        }
-
-        .sidebar a {
-            color: #fff;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: block;
-            padding: 10px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            font-weight: 500;
-        }
-
-        .sidebar a:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-3px);
-        }
-
-        @keyframes menuPop {
-            0% {
-                opacity: 0;
-                transform: translateX(-110%) scale(0.8);
-            }
-            50% {
-                opacity: 1;
-                transform: translateX(10%) scale(1.1);
-            }
-            100% {
-                opacity: 1;
-                transform: translateX(0) scale(1);
-            }
-        }
-
-        .sidebar.active {
-            animation: menuPop 0.5s forwards;
         }
 
         .toggle-btn {
@@ -223,7 +168,7 @@
             border: none;
             width: 50px;
             height: 50px;
-            border-radius: 50%;
+            border-radius: 15px;
             position: fixed;
             top: 20px;
             left: 20px;
@@ -248,7 +193,7 @@
             width: 100%;
             height: 100%;
             perspective: 1000px;
-            z-index: 0;
+            z-index: 0; /* Send it to the back */
             pointer-events: none;
         }
 
@@ -260,7 +205,7 @@
             left: 50%;
             transform-style: preserve-3d;
             animation: rotate 20s infinite linear;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%); /* Center the cube */
         }
 
         .cube div {
@@ -299,8 +244,8 @@
         }
 
         .feature-item {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.2); /* Darker background */
+            backdrop-filter: blur(10px); /* Add blur effect */
             padding: 1.5rem;
             border-radius: 10px;
             text-align: center;
@@ -406,7 +351,7 @@
         <main class="hero">
             <div class="hero-content">
                 <div class="social-proof">
-                    <h2>Made by CodeSquad</h2>
+                    <h2>Trusted by Thousands</h2>
                     <p>Join our community of savvy spenders and start saving today!</p>
                 </div>
                 <div class="social-icons">
@@ -416,36 +361,74 @@
                 </div>
             </div>
             <div class="hero-image">
-                <img src="https://i.pinimg.com/736x/df/dd/eb/dfddeb0ffdbac2e3152d0291af5e1628.jpg" alt="Budget Buddy Image"/>
+                <img src="https://i.pinimg.com/736x/2b/d7/4e/2bd74ee122296a92743931c38f3ec28a.jpg" alt="Budget Buddy Image"/>
             </div>    
         </main>
         
         <section class="feature-grid">
             <div class="feature-item">
                 <div class="feature-icon">💰</div>
-                <h3 class="feature-title">Track Your Expenses</h3>
-                <p class="feature-description">Easily log and categorize your daily expenses to stay on top of your finances.</p>
+                <h3 class="feature-title">Track Expenses</h3>
+                <p class="feature-description">Easily monitor your daily, weekly, and monthly spending habits.</p>
             </div>
             <div class="feature-item">
-                <div class="feature-icon">📊</div>
-                <h3 class="feature-title">Create a Budget</h3>
-                <p class="feature-description">Set financial goals and create a personalized budget that works for you.</p>
+                <div class="feature-icon">🎯</div>
+                <h3 class="feature-title">Set Goals</h3>
+                <p class="feature-description">Create and achieve your financial goals with our smart planning tools.</p>
             </div>
             <div class="feature-item">
-                <div class="feature-icon">💳</div>
-                <h3 class="feature-title">Discover Local Deals</h3>
-                <p class="feature-description">Find exclusive discounts and promotions from local businesses tailored to your budget.</p>
+                <div class="feature-icon">🏪</div>
+                <h3 class="feature-title">Local Deals</h3>
+                <p class="feature-description">Discover budget-friendly shops and deals in your area.</p>
             </div>
         </section>
-
-        
     </div>
+    
+    <footer>
+        <small>Made by codesquad</small>
+    </footer>
 
     <script>
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('active');
         }
+
+        function createFloatingIcon(icon, delay) {
+            const element = document.createElement('div');
+            element.classList.add('floating-icon');
+            element.innerHTML = icon;
+            element.style.left = `${Math.random() * window.innerWidth}px`;
+            element.style.top = `${Math.random() * window.innerHeight}px`;
+            element.style.animationDelay = `${delay}s`;
+            document.body.appendChild(element);
+        }
+
+        const icons = ['💰', '💳', '📊', '🏦', '💹', '📈'];
+        icons.forEach((icon, index) => createFloatingIcon(icon, index * 0.5));
+
+        const toggleBtn = document.querySelector('.toggle-btn');
+        toggleBtn.addEventListener('click', function(e) {
+            let ripple = document.createElement('span');
+            ripple.style.position = 'absolute';
+            ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+            ripple.style.borderRadius = '50%';
+            ripple.style.width = '100%';
+            ripple.style.height = '100%';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.opacity = '1';
+
+            this.appendChild(ripple);
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+
+        const backgroundObjects = document.querySelectorAll('.background-object');
+        backgroundObjects.forEach((obj, index) => {
+            obj.style.animationDelay = `${index * 0.5}s`;
+        });
     </script>
 </body>
 </html>

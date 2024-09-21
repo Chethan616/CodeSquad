@@ -22,42 +22,18 @@ document.getElementById('budgetForm').addEventListener('submit', async function(
 });
 
 async function getNearbyPlaces(location, hotelBudget, shopBudget) {
-    // (existing code)
+    let radius = 1000;
+    let overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["tourism"="hotel"](around:${radius},${location.lat},${location.lng});node["shop"](around:${radius},${location.lat},${location.lng}););out body;`;
 
-    // Add markers for hotels
-    hotels.forEach(hotel => {
-        if (hotel.lat && hotel.lon) {
-            const marker = L.marker([hotel.lat, hotel.lon]).addTo(map);
-            marker.bindPopup(`${hotel.tags.name || 'Unnamed Hotel'} - Estimated Cost: Rs.${(Math.random() * hotelBudget).toFixed(2)}`);
-        }
-    });
+    let response = await fetch(overpassUrl);
+    let data = await response.json();
 
-    // Add markers for shops
-    shops.forEach(shop => {
-        if (shop.lat && shop.lon) {
-            let shopIcon;
+    let hotels = data.elements.filter(place => place.tags.tourism === 'hotel');
+    let shops = data.elements.filter(place => place.tags.shop);
 
-            // Select the appropriate icon based on shop type
-            switch (shop.tags.shop) {
-                case "general":
-                    shopIcon = generalShopIcon;
-                    break;
-                case "gifts":
-                    shopIcon = giftsShopIcon;
-                    break;
-                case "food":
-                    shopIcon = foodShopIcon;
-                    break;
-                default:
-                    shopIcon = redShopIcon; // Fallback icon
-            }
-
-            const marker = L.marker([shop.lat, shop.lon], { icon: shopIcon }).addTo(map);
-            marker.bindPopup(`${shop.tags.name || 'Unnamed Shop'} - Estimated Cost: Rs.${(Math.random() * shopBudget).toFixed(2)}`);
-        }
-    });
+    displayPlaces(hotels, 'hotelList', hotelBudget);
+    displayPlaces(shops, 'shopList', shopBudget);
 }
-
 
 
 function displayPlaces(places, elementId, budget) {
