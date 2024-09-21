@@ -6,12 +6,11 @@
     <title>Budget Buddy - Your Ultimate Spending Management Tool</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-green: #4CAF50;
-            --dark-green: #45a049;
-            --light-green: #8BC34A;
-        }
-
+:root {
+    --primary-green: transparent; /* Fully transparent */
+    --dark-green: transparent; 
+    --light-green: transparent;
+}
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -76,28 +75,48 @@
         }
 
         .cta-button {
-            background-color: var(--primary-green);
-            color: white;
-            padding: 1rem 2.5rem;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-decoration: none;
-            font-size: 1.2rem;
-            font-weight: 600;
-            display: inline-block;
-            margin-top: 2rem;
             position: relative;
-            overflow: hidden;
-        }
+    overflow: hidden;
+    background-color: var(--primary-green);
+    color: white;
+    padding: 1rem 2.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 2rem;
+    
+}
 
-        .cta-button:hover {
-            background-color: var(--dark-green);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
-        }
+.cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--dark-green);
+    border-radius: 50px;
+    filter: blur(0);
+    transition: filter 0.3s ease;
+    z-index: 0; /* Send it behind the text */
+}
+
+.cta-button:hover::before {
+    filter: blur(6px); /* Increased blur effect on hover */
+}
+
+.cta-button:hover {
+    background-color: var(--dark-green);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
 
         .hero {
             display: flex;
@@ -143,59 +162,89 @@
         }
 
         .sidebar {
-            position: fixed;
-            top: 90px;
-            left: 20px;
-            width: 200px;
-            height: auto;
-            background: transparent;
-            color: #fff;
-            padding: 20px;
-            box-shadow: none;
-            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            transform: translateX(-110%);
-            z-index: 1000;
-        }
+    position: fixed;
+    top: 90px;
+    left: 20px;
+    width: 250px; /* Adjust as necessary */
+    height: auto;
+    background: rgba(255, 255, 255, 0.1); /* Frosted glass effect */
+    backdrop-filter: blur(10px);
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    padding: 0; /* Set padding to 0 for better alignment */
+    border-radius: 20px; /* Softer rounded edges */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2); /* Shadow for emphasis */
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transform: translateX(-110%);
+    z-index: 1000;
+    box-sizing: border-box; /* Include padding and border in width/height calculations */
+}
 
-        .sidebar.active {
-            transform: translateX(0);
-        }
+.sidebar.active {
+    transform: translateX(0);
+    animation: menuPop 0.5s forwards;
+}
 
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
+.sidebar ul {
+    list-style: none;
+    padding: 10px; /* Add padding here for better spacing inside the menu */
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align items to the left */
+}
 
-        .sidebar li {
-            margin-bottom: 15px;
-            width: 100%;
-            text-align: center;
-        }
+.sidebar li {
+    margin-bottom: 10px; /* Adjusted for tighter spacing */
+    width: 100%;
+}
 
-        .sidebar a {
-            color: #fff;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: block;
-            padding: 10px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            font-weight: 500;
-        }
+.sidebar a {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 15px 20px; /* Padding for menu items */
+    border-radius: 12px; /* Rounded edges for menu items */
+    background: rgba(255, 255, 255, 0.1);
+     /* Transparent background */
+    font-size: 1.1rem; /* Slightly increased font size */
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+.sidebar a:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3); /* Enhanced hover shadow */
+}
+.toggle-btn {
+    cursor: pointer;
+    background: var(--primary-green);
+    color: white;
+    border: 4px solid var(--dark-green); /* Thicker constant border */
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
 
-        .sidebar a:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-3px);
-        }
+.toggle-btn:hover {
+    background: var(--dark-green);
+    transform: rotate(90deg);
+    /* No changes to border or text color */
+}
+
+
 
         @keyframes menuPop {
             0% {
@@ -217,29 +266,31 @@
         }
 
         .toggle-btn {
-            cursor: pointer;
-            background: var(--primary-green);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1001;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
+    cursor: pointer;
+    background: var(--primary-green);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50px; /* Thicker constant border */
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
 
-        .toggle-btn:hover {
-            transform: rotate(90deg);
-            background: var(--dark-green);
-        }
+.toggle-btn:hover {
+    background: var(--dark-green);
+    transform: rotate(90deg);
+    /* No changes to border or text color */
+}
 
         .scene {
             position: fixed;
@@ -423,7 +474,7 @@
         <section class="feature-grid">
             <div class="feature-item">
                 <div class="feature-icon">💰</div>
-                <h3 class="feature-title">Save Your Expenses</h3>
+                <h3 class="feature-title">Track Your Expenses</h3>
                 <p class="feature-description">Easily log and categorize your daily expenses to stay on top of your finances.</p>
             </div>
             <div class="feature-item">

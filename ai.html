@@ -3,100 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Budget Recommendations</title>
+    <title>AI Interface</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            background-color: #f4f4f4;
+            padding: 20px;
         }
         h1 {
             text-align: center;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            opacity: 0.9;
-        }
-        .submit-btn {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .back-btn {
-            background-color: #28a745;
-            color: white;
-            margin-top: 10px;
-        }
-        #results {
+        #aiResponse {
             margin-top: 20px;
-            background-color: #f9f9f9;
             padding: 10px;
-            border: 1px solid #ccc;
+            background-color: #fff;
             border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>AI Budget Recommendations</h1>
-        <form id="aiForm">
-            <input type="number" id="totalBudget" placeholder="Total Budget (Rs.)" required>
-            <input type="number" id="spendingHistory" placeholder="Your Spending History (Rs.)" required>
-            <button type="submit" class="submit-btn">Get Recommendations</button>
-        </form>
-        <button class="back-btn" onclick="goBack()">Back</button>
-        <div id="results" style="display: none;">
-            <h2>Recommendations</h2>
-            <div id="recommendationOutput"></div>
-        </div>
-    </div>
+    <h1>Ask AI</h1>
+    <textarea id="userInput" placeholder="Type your question here..." rows="4" style="width: 100%;"></textarea>
+    <button id="askButton">Ask</button>
+    
+    <div id="aiResponse"></div>
 
     <script>
-        document.getElementById('aiForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const totalBudget = document.getElementById('totalBudget').value;
-            const spendingHistory = document.getElementById('spendingHistory').value;
-
-            // Call the AI function to get recommendations
-            const recommendations = await getRecommendations(totalBudget, spendingHistory);
-
-            // Display recommendations
-            document.getElementById('recommendationOutput').innerText = recommendations;
-            document.getElementById('results').style.display = 'block';
+        document.getElementById('askButton').addEventListener('click', () => {
+            const userInput = document.getElementById('userInput').value;
+            // Here, you can handle the AI response logic.
+            document.getElementById('aiResponse').innerText = "AI response for: " + userInput;
         });
-
-        async function getRecommendations(totalBudget, spendingHistory) {
-            // Mock AI logic: replace this with an actual API call or machine learning model
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    const recommendedHotelBudget = (totalBudget * 0.4).toFixed(2);
-                    const recommendedShopBudget = (totalBudget * 0.3).toFixed(2);
-                    resolve(`Recommended Hotel Budget: Rs. ${recommendedHotelBudget}\nRecommended Shop Budget: Rs. ${recommendedShopBudget}`);
-                }, 1000);
-            });
-        }
-
-        function goBack() {
-            window.history.back();
-        }
     </script>
 </body>
 </html>
