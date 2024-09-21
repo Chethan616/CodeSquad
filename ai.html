@@ -9,6 +9,10 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100vh; /* Full viewport height */
         }
         h1 {
             text-align: center;
@@ -20,14 +24,29 @@
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+        #goBackButton {
+            margin-top: 30px; /* Adds space above the button */
+            background-color: #4CAF50; /* Green color */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            align-self: center; /* Center the button horizontally */
+        }
+        #goBackButton:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
     </style>
 </head>
 <body>
-    <h1>Ask AI   (UNDER DEVELOPMENT ---- NEEDS TO BE IMPLEMENTED)</h1>
+    <h1>Ask AI (UNDER DEVELOPMENT ---- NEEDS TO BE IMPLEMENTED)</h1>
     <textarea id="userInput" placeholder="Type your question here..." rows="4" style="width: 100%;"></textarea>
     <button id="askButton">Ask</button>
     
     <div id="aiResponse"></div>
+
+    <button id="goBackButton" onclick="window.location.href='budgetplanner.html'">Go Back</button>
 
     <script>
         document.getElementById('askButton').addEventListener('click', () => {
