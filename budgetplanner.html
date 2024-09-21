@@ -4,126 +4,313 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Buddy - Your Ultimate Spending Management Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-green: #4CAF50;
+            --dark-green: #45a049;
+            --light-green: #8BC34A;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #4A0E4E, #81267D, #4169E1, #00BFFF);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
             margin: 0;
             padding: 0;
-            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
             color: white;
+            overflow-x: hidden;
         }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            margin-left: 220px; /* Space for the sidebar */
+            padding: 2rem;
+            position: relative;
+            z-index: 2;
         }
+
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            text-align: center;
+            padding: 4rem 0;
+            position: relative;
+            overflow: hidden;
         }
-        nav a {
+
+        header h1 {
+            font-size: 4.5rem;
             color: white;
-            text-decoration: none;
-            margin-left: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
         }
+
+        header p {
+            font-size: 1.8rem;
+            color: #f0f0f0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            max-width: 800px;
+            margin: 1rem auto;
+            opacity: 0;
+            transform: translateY(50px);
+            animation: fadeInUp 1s forwards 1s;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cta-button {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button:hover {
+            background-color: var(--dark-green);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
         .hero {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 50px 0;
-        }
-        .hero-content {
-            flex: 1;
-        }
-        .hero-image {
-            flex: 1;
-            text-align: right;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-        .cta-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .social-proof {
-            display: flex;
-            align-items: center;
-        }
-        .social-icons a {
-            margin-right: 10px;
-            color: white;
+            margin-top: 4rem;
         }
 
-        /* Sidebar styles */
+        .hero-content {
+            flex: 1;
+            margin-right: 2rem;
+        }
+
+        .hero-image {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hero-image img {
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .hero-image:hover img {
+            transform: scale(1.05);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            margin-top: auto;
+            position: relative;
+            z-index: 2;
+        }
+
         .sidebar {
             position: fixed;
             top: 0;
             left: 0;
             width: 200px;
             height: 100%;
-            background: #343a40;
+            background: rgba(52, 58, 64, 0.9);
             color: #fff;
             padding: 20px;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s ease;
             transform: translateX(-100%);
+            z-index: 1000;
         }
 
         .sidebar.active {
             transform: translateX(0);
         }
 
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin-top: 60px;
-        }
-
-        .sidebar ul li {
-            margin: 15px 0;
-        }
-
-        .sidebar ul li a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.1em;
-            transition: color 0.3s;
-        }
-
-        .sidebar ul li a:hover {
-            color: #4CAF50;
-        }
-
-        /* Toggle Button for Sidebar */
         .toggle-btn {
             cursor: pointer;
-            background: #4CAF50;
+            background: var(--primary-green);
             color: white;
             border: none;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 5px;
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
             position: fixed;
             top: 20px;
             left: 20px;
-            z-index: 1000;
+            z-index: 1001;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            transform: rotate(90deg);
+            background: var(--dark-green);
+        }
+
+        .scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            perspective: 1000px;
+            z-index: 0; /* Send it to the back */
+            pointer-events: none;
+        }
+
+        .cube {
+            width: 150px;
+            height: 150px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-style: preserve-3d;
+            animation: rotate 20s infinite linear;
+            transform: translate(-50%, -50%); /* Center the cube */
+        }
+
+        .cube div {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+        }
+
+        .front  { transform: rotateY(0deg) translateZ(75px); }
+        .back   { transform: rotateY(180deg) translateZ(75px); }
+        .right  { transform: rotateY(90deg) translateZ(75px); }
+        .left   { transform: rotateY(-90deg) translateZ(75px); }
+        .top    { transform: rotateX(90deg) translateZ(75px); }
+        .bottom { transform: rotateX(-90deg) translateZ(75px); }
+
+        @keyframes rotate {
+            0% { transform: rotateX(0) rotateY(0); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.2); /* Darker background */
+            backdrop-filter: blur(10px); /* Add blur effect */
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .floating-icon {
+            position: absolute;
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.6);
+            animation: float 6s infinite ease-in-out;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        .background-objects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .background-object {
+            position: absolute;
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.2);
+            animation: float 10s infinite ease-in-out;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <div class="sidebar">
         <ul>
             <li><a href="index.html">Get Started</a></li>
@@ -133,27 +320,40 @@
         </ul>
     </div>
 
-    <!-- Toggle Button for Sidebar -->
     <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+    <div class="scene">
+        <div class="cube">
+            <div class="front">Budget</div>
+            <div class="back">Buddy</div>
+            <div class="right">Save</div>
+            <div class="left">Spend</div>
+            <div class="top">Plan</div>
+            <div class="bottom">Grow</div>
+        </div>
+    </div>
+
+    <div class="background-objects">
+        <div class="background-object" style="top: 10%; left: 5%;">💰</div>
+        <div class="background-object" style="top: 30%; right: 10%;">📊</div>
+        <div class="background-object" style="bottom: 15%; left: 15%;">💳</div>
+        <div class="background-object" style="top: 60%; right: 20%;">🏦</div>
+        <div class="background-object" style="bottom: 30%; left: 25%;">💹</div>
+    </div>
 
     <div class="container">
         <header>
-            <div class="logo">
-                <img src="logo.jpg" alt="Budget Buddy Logo" style="width: 50px; height: 50px; border-radius: 50%; margin-left: 20px;"/>
-            </div>
-            <nav>
-                <a href="working.html">How It Works</a>
-                <a href="query.html">Have any query?</a>
-                <a href="about.html" class="cta-button">About us →</a>
-            </nav>
+            <h1>Budget Buddy</h1>
+            <p>Your ultimate tool for managing spending and discovering local shops tailored to your budget.</p>
+            <a href="index.html" class="cta-button">Get Started →</a>
         </header>
         
-        <main class="hero" style="margin-left: 50px;">
+        <main class="hero">
             <div class="hero-content">
-                <h1>Welcome to Budget Buddy</h1>
-                <p>Your ultimate tool for managing spending and discovering local shops tailored to your budget.</p>
-                <a href="index.html" class="cta-button">Get Started →</a>
-                <div class="social-proof"></div>
+                <div class="social-proof">
+                    <h2>Trusted by Thousands</h2>
+                    <p>Join our community of savvy spenders and start saving today!</p>
+                </div>
                 <div class="social-icons">
                     <a href="#"><i class="fab fa-tiktok"></i></a>
                     <a href="#"><i class="fab fa-discord"></i></a>
@@ -161,13 +361,30 @@
                 </div>
             </div>
             <div class="hero-image">
-                <img src="pic.jpg" alt="Budget Buddy Logo" style="width: 400px; height: 300px; border-radius: 10px; margin-top: 260px; margin-bottom: 140px; margin-left: 20px;"/>          
-            </div>            
+                <img src="https://i.pinimg.com/736x/2b/d7/4e/2bd74ee122296a92743931c38f3ec28a.jpg" alt="Budget Buddy Image"/>
+            </div>    
         </main>
         
+        <section class="feature-grid">
+            <div class="feature-item">
+                <div class="feature-icon">💰</div>
+                <h3 class="feature-title">Track Expenses</h3>
+                <p class="feature-description">Easily monitor your daily, weekly, and monthly spending habits.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🎯</div>
+                <h3 class="feature-title">Set Goals</h3>
+                <p class="feature-description">Create and achieve your financial goals with our smart planning tools.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🏪</div>
+                <h3 class="feature-title">Local Deals</h3>
+                <p class="feature-description">Discover budget-friendly shops and deals in your area.</p>
+            </div>
+        </section>
     </div>
     
-    <footer style="text-align: center; padding: 20px;">
+    <footer>
         <small>Made by codesquad</small>
     </footer>
 
@@ -176,6 +393,42 @@
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('active');
         }
+
+        function createFloatingIcon(icon, delay) {
+            const element = document.createElement('div');
+            element.classList.add('floating-icon');
+            element.innerHTML = icon;
+            element.style.left = `${Math.random() * window.innerWidth}px`;
+            element.style.top = `${Math.random() * window.innerHeight}px`;
+            element.style.animationDelay = `${delay}s`;
+            document.body.appendChild(element);
+        }
+
+        const icons = ['💰', '💳', '📊', '🏦', '💹', '📈'];
+        icons.forEach((icon, index) => createFloatingIcon(icon, index * 0.5));
+
+        const toggleBtn = document.querySelector('.toggle-btn');
+        toggleBtn.addEventListener('click', function(e) {
+            let ripple = document.createElement('span');
+            ripple.style.position = 'absolute';
+            ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+            ripple.style.borderRadius = '50%';
+            ripple.style.width = '100%';
+            ripple.style.height = '100%';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.opacity = '1';
+
+            this.appendChild(ripple);
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+
+        const backgroundObjects = document.querySelectorAll('.background-object');
+        backgroundObjects.forEach((obj, index) => {
+            obj.style.animationDelay = `${index * 0.5}s`;
+        });
     </script>
 </body>
 </html>

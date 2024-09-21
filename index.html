@@ -1,137 +1,476 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en">\
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenStreetMap Budget Planner</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <style>
-        /* Sidebar styles */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 200px;
-            height: 100%;
-            background: #343a40;
-            color: #fff;
-            padding: 20px;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease;
-            transform: translateX(-100%);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced OpenStreetMap Budget Planner</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Leaflet.js -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
-        .sidebar.active {
-            transform: translateX(0);
-        }
+  <style>
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin-top: 60px;
-        }
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+      100% { transform: translateY(0px); }
+    }
 
-        .sidebar ul li {
-            margin: 15px 0;
-        }
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-        .sidebar ul li a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.1em;
-            transition: color 0.3s;
-        }
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(-45deg, #5c5a5a, #e73c7e, #23a6d5, #23d5ab);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
-        .sidebar ul li a:hover {
-            color: #4CAF50;
-        }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
 
-        /* Toggle Button for Sidebar */
-        .toggle-btn {
-            cursor: pointer;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 5px;
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-        }
+    header {
+      text-align: center;
+      padding: 2rem 0;
+      position: relative;
+      overflow: hidden;
+    }
 
-        /* Container styles */
-        .container {
-            margin-left: 220px; /* Space for the sidebar */
-            max-width: 800px; /* Maximum width of the container */
-            margin-right: auto; /* Center it on the right */
-            margin-left: auto; /* Center it on the left */
-            padding: 20px; /* Padding for content */
-        }
-    </style>
+    header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+      animation: rotate 20s linear infinite;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 1;
+    }
+
+    header p {
+      font-size: 1.4rem;
+      color: #f0f0f0;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    #budgetForm {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    #totalBudget {
+      padding: 0.8rem;
+      border-radius: 25px;
+      border: none;
+      font-size: 1.1rem;
+      width: 300px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #totalBudget:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+    }
+
+    button {
+      padding: 0.8rem 2rem;
+      font-size: 1.1rem;
+      border-radius: 25px;
+      border: none;
+      background-color: #4CAF50;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      background-color: #45a049;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    #askAIButton {
+  background-color: #3949ab;
+  margin-top: 1rem;
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: fixed; /* Fixes the button in place */
+  bottom: 20px;    /* Positions it 20px from the bottom */
+  right: 20px;     /* Positions it 20px from the right */
+  z-index: 1000;   /* Ensures it stays above other elements */
+}
+
+#askAIButton:hover {
+  background-color: #303f9f;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+}
+
+    #map {
+      height: 400px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    #map:hover {
+      transform: scale(1.02);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    #results {
+      margin-top: 3rem;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #results h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+
+    #results h3 {
+      font-size: 1.4rem;
+      color: #2c3e50;
+      margin-top: 1.5rem;
+    }
+
+    #chartContainer {
+  margin-top: 3rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 1rem; /* Reduced padding */
+  border-radius: 15px;
+  width: 400px;  /* Set a fixed width */
+  height: 300px; /* Set a fixed height */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      background-color: rgba(81, 80, 80, 0.8);
+      color: #fff;
+      margin-top: auto;
+    }
+
+    #threeJSContainer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.3;
+    }
+
+    .floating-element {
+      position: absolute;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    #compass {
+      top: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>');
+      background-size: contain;
+      animation: float 6s ease-in-out infinite, rotate 10s linear infinite;
+    }
+
+    #globe {
+      bottom: 20px;
+      left: 20px;
+      width: 80px;
+      height: 80px;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>');
+      background-size: contain;
+    }
+  </style>
 </head>
 <body>
+  <div id="threeJSContainer"></div>
+  <div class="floating-element" id="compass"></div>
+  <div class="floating-element" id="globe"></div>
+  
+  <div class="container">
+    <header>
+      <h1>"           BudgetBuddy       "</h1>
+      <p>Plan your budget based on your location</p>
+    </header>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <ul>
-            <li><a href="budgetplanner.html">back to home</a></li>
-            <li><a href="working.html">How It Works</a></li>
-            <li><a href="about.html">About Us</a></li>
-        </ul>
+<main style="display: flex; justify-content: space-between;">
+  <div id="formResultsContainer" style="flex: 1; margin-right: 2rem;">
+    <div id="formContainer">
+      <form id="budgetForm">
+        <input type="number" id="totalBudget" placeholder="Enter your total budget (Rs.)" required>
+        <button type="submit">Plan My Budget</button>
+      </form>
     </div>
 
-    <!-- Toggle Button for Sidebar -->
-    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+    <div id="results">
+      <h2>Nearby shops & hotels</h2>
+      <div id="hotels">
+        <h3>Hotels</h3>
+        <ul id="hotelList"></ul>
+      </div>
+      <div id="shops">
+        <h3>Shops</h3>
+        <ul id="shopList"></ul>
+      </div>
+    </div>
+  </div>
 
-    <!-- Main Content -->
-    <div class="container">
-        <h1>Made by CodeSquad</h1>
+  <div id="mapContainer" style="flex: 3; min-width: 400px;"> <!-- Give more space to the map -->
+    <div id="map"></div>
+  </div>
+</main>
 
-        <form id="budgetForm">
-            <label for="totalBudget">Total Budget (Rs.):</label>
-            <input type="number" id="totalBudget" placeholder="Enter your total budget" required>
+    
 
-            <label for="hotelBudget">Percentage for Hotels (%):</label>
-            <input type="number" id="hotelBudget" placeholder="Enter % for hotels" required>
-
-            <label for="shopBudget">Percentage for Shops (%):</label>
-            <input type="number" id="shopBudget" placeholder="Enter % for shops" required>
-
-            <button type="submit">Plan My Budget</button>
-        </form>
-
-        <div id="results">
-            <h2>Recommendations</h2>
-            <div id="hotels">
-                <h3>Hotels</h3>
-                <ul id="hotelList"></ul>
-            </div>
-            <div id="shops">
-                <h3>Shops</h3>
-                <ul id="shopList"></ul>
-            </div>
-        </div>
+    <div id="results">
+      <h2>Recommendations</h2>
+      <div id="hotels">
+        <h3>Hotels</h3>
+        <ul id="hotelList"></ul>
+      </div>
+      <div id="shops">
+        <h3>Shops</h3>
+        <ul id="shopList"></ul>
+      </div>    
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="script.js"></script>
+    <div id="chartContainer">
+      <canvas id="budgetChart"></canvas>
+    </div>
+  </div>
 
-    <script>
-        // Sidebar toggle function
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('active');
+  <footer>
+    <p> Made by CodeSquad </p>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    // Initialize Three.js scene
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('threeJSContainer').appendChild(renderer.domElement);
+
+    // Create a simple cube
+// ... (rest of the code remains the same)
+
+// Create a simple cube
+const geometry = new THREE.BoxGeometry();
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+
+// Create another cube for the right bottom corner
+const cube2Geometry = new THREE.BoxGeometry();
+const cube2Material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+const cube2 = new THREE.Mesh(cube2Geometry, cube2Material);
+cube2.position.set(window.innerWidth - 100, window.innerHeight - 100, 10); // position it in the right bottom corner
+scene.add(cube2);
+
+camera.position.z = 5;
+
+// Animation loop
+function animate() {
+  requestAnimationFrame(animate);
+  cube.rotation.x += 0.02;
+  cube.rotation.y += 0.02;
+  cube2.rotation.x += 0.02; // rotate the second cube as well
+  cube2.rotation.y += 0.02;
+  renderer.render(scene, camera);
+}
+animate();
+
+    // Rest of your JavaScript code here (map initialization, budget planning, etc.)
+    // ...
+
+    let map;
+    let userMarker;
+    let markers = [];
+    let budgetChart;
+
+    function initMap(lat = 28.6139, lon = 77.2090) {
+      map = L.map('map').setView([lat, lon], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      getUserLocation();
+    });
+
+    // Sample data for hotels and shops (replace with real data or API calls)
+    const hotels = [
+      { name: "Luxury Hotel", price: 5000, lat: 28.6304, lon: 77.2177 },
+      { name: "Budget Inn", price: 2000, lat: 28.6129, lon: 77.2295 },
+      { name: "Mid-range Stay", price: 3500, lat: 28.6231, lon: 77.2006 }
+    ];
+
+    const shops = [
+      { name: "Local Market", type: "General", lat: 28.6333, lon: 77.2207 },
+      { name: "Souvenir Shop", type: "Gifts", lat: 28.6151, lon: 77.2407 },
+      { name: "Street Food Corner", type: "Food", lat: 28.6289, lon: 77.2065 }
+    ];
+
+    document.getElementById('budgetForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const budget = parseFloat(document.getElementById('totalBudget').value);
+      planBudget(budget);
+    });
+
+    function getUserLocation() {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          map.setView([lat, lon], 13);
+          if (userMarker) {
+            map.removeLayer(userMarker);
+          }
+          userMarker = L.marker([lat, lon]).addTo(map);
+          userMarker.bindPopup("You are here!").openPopup();
+        }, function(error) {
+          console.error("Error getting user location:", error);
+        });
+      }
+    }
+
+    function planBudget(budget) {
+      // Clear previous markers
+      markers.forEach(marker => map.removeLayer(marker));
+      markers = [];
+
+      // Filter hotels and shops based on budget
+      const affordableHotels = hotels.filter(hotel => hotel.price <= budget * 0.4);
+      const affordableShops = shops;
+
+      // Add markers for affordable hotels and shops
+      affordableHotels.forEach(hotel => {
+        const marker = L.marker([hotel.lat, hotel.lon]).addTo(map);
+        marker.bindPopup(`${hotel.name} - Rs. ${hotel.price}/night`);
+        markers.push(marker);
+      });
+
+      affordableShops.forEach(shop => {
+        const marker = L.marker([shop.lat, shop.lon]).addTo(map);
+        marker.bindPopup(`${shop.name} - ${shop.type}`);
+        markers.push(marker);
+      });
+
+      // Update recommendations lists
+      updateRecommendationsList('hotelList', affordableHotels, hotel => `${hotel.name} - Rs. ${hotel.price}/night`);
+      updateRecommendationsList('shopList', affordableShops, shop => `${shop.name} - ${shop.type}`);
+
+      // Update budget chart
+      updateBudgetChart(      budget * 0.4, budget * 0.3, budget * 0.2, budget * 0.1);
+    }
+
+    function updateRecommendationsList(listId, items, formatFn) {
+      const list = document.getElementById(listId);
+      list.innerHTML = '';
+      items.forEach(item => {
+        const listItem = document.createElement('li');
+        listItem.textContent = formatFn(item);
+        list.appendChild(listItem);
+      });
+    }
+
+    function updateBudgetChart(budget, hotelsBudget, foodBudget, transportBudget, otherBudget) {
+      const ctx = document.getElementById('budgetChart').getContext('2d');
+      if (budgetChart) {
+        budgetChart.destroy();
+      }
+      budgetChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Hotels', 'Food', 'Transport', 'Other'],
+          datasets: [{
+            label: 'Budget Distribution',
+            data: [hotelsBudget, foodBudget, transportBudget, otherBudget],
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50'],
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            tooltip: {
+              callbacks: {
+                label: function(tooltipItem) {
+                  const amount = tooltipItem.raw;
+                  return `Rs. ${amount.toFixed(0)}`;
+                }
+              }
+            }
+          }
         }
+      });
+    }
 
-        // Automatically activate the sidebar on page load
-        const sidebar = document.querySelector('.sidebar');
-        sidebar.classList.add('active');
-    </script>
+    document.getElementById('askAIButton').addEventListener('click', function() {
+      alert("AI Recommendations feature coming soon!");
+    });
+  </script>
 </body>
 </html>

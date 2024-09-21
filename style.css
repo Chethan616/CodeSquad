@@ -1,7 +1,15 @@
 body {
     font-family: 'Poppins', sans-serif;
     font-weight: bolder;
-    background: linear-gradient(135deg, #3b3b3b, #121212);
+    
+    background: linear-gradient(135deg, #3b3b3b, #121212), 
+                url('https://i.pinimg.com/736x/7d/5b/42/7d5b42f3a0518c3484e22532a25d2070.jpg');
+    
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    
     color: #ffffff;
     margin: 0;
     padding: 0;
@@ -10,12 +18,8 @@ body {
     align-items: center;
     height: 100vh;
     overflow: hidden;
-
-    background-image: url('https://c4.wallpaperflare.com/wallpaper/826/524/865/3-316-16-9-aspect-ratio-s-sfw-wallpaper-preview.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
 }
+
 
 .container {
     max-width: 600px;
@@ -72,27 +76,39 @@ input::placeholder {
 }
 
 button {
-    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    background: linear-gradient(135deg, #28a745, #218838); /* Green gradient */
     color: #fff;
     cursor: pointer;
     transition: all 0.3s ease;
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    font-size: 1.2em;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 button:hover {
-    box-shadow: 0 4px 15px rgba(255, 126, 95, 0.6);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.6); /* Shadow with a green tint */
     transform: translateY(-2px);
 }
 
+
 #results {
-    margin-top: 30px;
+    max-height: 400px; 
+    overflow-y: auto; 
+    border: 1px solid #ccc; 
+    padding: 10px;
 }
 
+
 #hotels, #shops {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 15px;
-    padding: 15px;
-    margin-bottom: 20px;
+    max-height: 200px;
+    overflow-y: auto; 
+    border: 1px solid #ccc;
+    margin-bottom: 10px; 
+    padding: 10px; 
 }
+
 
 ul {
     list-style-type: none;

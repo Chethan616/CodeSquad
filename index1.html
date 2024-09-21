@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenStreetMap Budget Planner</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            
+            background-image: url('https://i.pinimg.com/736x/7d/5b/42/7d5b42f3a0518c3484e22532a25d2070.jpg');
+            
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            
+
+        }
+
+        #hotels, #shops {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(45px); 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        h1, h2, h3 {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b); 
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Budget Buddy</h1>
+        
+        <form id="budgetForm">
+            <label for="totalBudget">Total Budget (Rs.):</label>
+            <input type="number" id="totalBudget" placeholder="Enter your total budget" required>
+            
+            <label for="hotelBudget">Percentage for Hotels (%):</label>
+            <input type="number" id="hotelBudget" placeholder="Enter % for hotels" required>
+
+            <label for="shopBudget">Percentage for Shops (%):</label>
+            <input type="number" id="shopBudget" placeholder="Enter % for shops" required>
+            
+            <button type="submit">Plan My Budget</button>
+        </form>
+
+        <div id="results">
+            <h2>Recommendations</h2>
+            <div id="hotels">
+                <h3>Hotels</h3>
+                <ul id="hotelList"></ul>
+            </div>
+            <div id="shops">
+                <h3>Shops</h3>
+                <ul id="shopList"></ul>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
