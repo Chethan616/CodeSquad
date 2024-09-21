@@ -437,9 +437,10 @@ button {
         <main>
             <div id="formResultsContainer">
                 <form id="budgetForm">
-                    <input type="number" id="totalBudget" placeholder="Enter your weekly budget (Rs.)" required>
+                    <input type="number" id="totalBudget" placeholder="Enter your total budget (Rs.)" required>
+                    <input type="number" id="hotelBudget" placeholder="Hotel Budget (%)" required>
+                    <input type="number" id="shopBudget" placeholder="Shop Budget (%)" required>
                     <input type="number" id="transportationBudget" placeholder="Transportation Budget (%)" required>
-
                     <button type="submit">Plan My Budget</button>
                 </form>
             
@@ -524,97 +525,85 @@ button {
         });
 
         document.getElementById('budgetForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+            e.preventDefault();
 
-    let totalBudget = document.getElementById('totalBudget').value;
-    let hotelPercent = document.getElementById('hotelBudget').value;
-    let shopPercent = document.getElementById('shopBudget').value;
-    let transportationPercent = document.getElementById('transportationBudget').value; // Add this line
+            let totalBudget = parseFloat(document.getElementById('totalBudget').value);
+            let hotelPercent = parseFloat(document.getElementById('hotelBudget').value);
+            let shopPercent = parseFloat(document.getElementById('shopBudget').value);
+            let transportationPercent = parseFloat(document.getElementById('transportationBudget').value);
 
-    let hotelBudget = (totalBudget * (hotelPercent / 100)).toFixed(2);
-    let shopBudget = (totalBudget * (shopPercent / 100)).toFixed(2);
-    let transportationBudget = (totalBudget * (transportationPercent / 100)).toFixed(2); // Add this line
+            let hotelBudget = (totalBudget * (hotelPercent / 100)).toFixed(2);
+            let shopBudget = (totalBudget * (shopPercent / 100)).toFixed(2);
+            let transportationBudget = (totalBudget * (transportationPercent / 100)).toFixed(2);
 
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async function(position) {
-            let userLocation = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-            };
-            await getNearbyPlaces(userLocation, hotelBudget, shopBudget, transportationBudget); // Update this line
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async function(position) {
+                    let userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    await getNearbyPlaces(userLocation, hotelBudget, shopBudget);
+                    await getBudgetRecommendations(totalBudget, hotelBudget, shopBudget, transportationBudget);
+                    await predictExpenses(totalBudget, hotelBudget, shopBudget, transportationBudget);
+                    
+                });
+            }
         });
-    } else {
-        alert("Geolocation is not supported by this browser.");
-    }
-});
 
+        async function getNearbyPlaces(location, hotelBudget, shopBudget) {
+            let radius = 5000;
+            let overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["tourism"="hotel"](around:${radius},${location.lat},${location.lng});node["shop"](around:${radius},${location.lat},${location.lng}););out body;`;
 
-async function getNearbyPlaces(location, hotelBudget, shopBudget, transportationBudget) {
-    let radius = 5000;
-    let overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["tourism"="hotel"](around:${radius},${location.lat},${location.lng});node["shop"](around:${radius},${location.lat},${location.lng}););out body;`;
+            let response = await fetch(overpassUrl);
+            
+            if (!response.ok) {
+                console.error("Error fetching data from Overpass API:", response.statusText);
+                return;
+            }
+            
+            let data = await response.json();
+            console.log("API Data:", data);
 
-    try {
-        let response = await fetch(overpassUrl);
-        
-        if (!response.ok) {
-            throw new Error(`Error fetching data from Overpass API: ${response.statusText}`);
+            let hotels = data.elements.filter(place => place.tags.tourism === 'hotel');
+            let shops = data.elements.filter(place => place.tags.shop);
+
+            displayPlaces(hotels, shops, hotelBudget, shopBudget, location);
         }
 
-        let data = await response.json();
-        console.log("API Data:", data);
+        function displayPlaces(hotels, shops, hotelBudget, shopBudget, location) {
+            const hotelList = document.getElementById('hotelList');
+            const shopList = document.getElementById('shopList');
+            hotelList.innerHTML = '';
+            shopList.innerHTML = '';
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
 
-        let hotels = data.elements.filter(place => place.tags.tourism === 'hotel');
-        let shops = data.elements.filter(place => place.tags.shop);
+            hotels.forEach((hotel, index) => {
+                let button = document.createElement('button');
+                button.className = 'place-button';
+                button.innerText = `${hotel.tags.name || 'Unnamed Hotel'} - Approx. Budget: Rs. ${hotelBudget}`;
+                button.onclick = () => showMenu(hotel.tags.name || 'Unnamed Hotel');
+                hotelList.appendChild(button);
+                addMarker(hotel, 'hotel', location);
+                gsap.from(button, {opacity: 0, y: 20, duration: 0.5, delay: index * 0.1});
+            });
 
-        displayPlaces(hotels, 'hotelList', hotelBudget);
-        displayPlaces(shops, 'shopList', shopBudget);
-        displayTransportationOptions(transportationBudget); // Call to display transportation options
-    } catch (error) {
-        console.error(error);
-        alert("Failed to retrieve nearby places. Please try again later.");
-    }
-}
+            shops.forEach((shop, index) => {
+                let button = document.createElement('button');
+                button.className = 'place-button';
+                button.innerText = `${shop.tags.name || 'Unnamed Shop'} - Approx. Budget: Rs. ${shopBudget}`;
+                button.onclick = () => showMenu(shop.tags.name || 'Unnamed Shop');
+                shopList.appendChild(button);
+                addMarker(shop, 'shop', location);
+                gsap.from(button, {opacity: 0, y: 20, duration: 0.5, delay: index * 0.1});
+            });
 
+            updateChart([hotelBudget, shopBudget, 0]);
 
-function displayPlaces(hotels, shops, hotelBudget, shopBudget, location) {
-    const hotelList = document.getElementById('hotelList');
-    const shopList = document.getElementById('shopList');
-    hotelList.innerHTML = '';
-    shopList.innerHTML = '';
-    markers.forEach(marker => map.removeLayer(marker));
-    markers = [];
-
-    // Display hotels
-    hotels.forEach((hotel, index) => {
-        let button = document.createElement('button');
-        button.className = 'place-button';
-        button.innerText = `${hotel.tags.name || 'Unnamed Hotel'} - Approx. Budget: Rs. ${hotelBudget}`;
-        button.onclick = () => showMenu(hotel.tags.name || 'Unnamed Hotel');
-        hotelList.appendChild(button);
-        addMarker(hotel, 'hotel', location);
-        gsap.from(button, {opacity: 0, y: 20, duration: 0.5, delay: index * 0.1});
-    });
-
-    // Display shops
-    shops.forEach((shop, index) => {
-        let button = document.createElement('button');
-        button.className = 'place-button';
-        button.innerText = `${shop.tags.name || 'Unnamed Shop'} - Approx. Budget: Rs. ${shopBudget}`;
-        button.onclick = () => showMenu(shop.tags.name || 'Unnamed Shop');
-        shopList.appendChild(button);
-        addMarker(shop, 'shop', location);
-        gsap.from(button, {opacity: 0, y: 20, duration: 0.5, delay: index * 0.1});
-    });
-
-    // Update the budget chart
-    updateChart([hotelBudget, shopBudget, 0]);
-
-    // Add user marker if not already present
-    if (!userMarker) {
-        userMarker = L.marker([location.lat, location.lng]).addTo(map).bindPopup('You are here').openPopup();
-    }
-}
-
+            if (!userMarker) {
+                userMarker = L.marker([location.lat, location.lng]).addTo(map).bindPopup('You are here').openPopup();
+            }
+        }
 
         const menus = {
     'Hotel Grand Krishna': {
