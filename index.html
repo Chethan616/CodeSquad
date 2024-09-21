@@ -36,13 +36,12 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            padding-left: 0; /* Keep this to move content left */
         }
 
         header {
-            text-align: center;
+            text-align: left; /* Keep header text aligned to the left */
             padding: 2rem 0;
-            position: relative;
-            overflow: hidden;
         }
 
         header h1 {
@@ -60,10 +59,21 @@
 
         #budgetForm {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start; /* Align form items to the left */
             align-items: center;
             gap: 1rem;
             margin-bottom: 2rem;
+        }
+
+        main {
+            display: flex;
+            justify-content: flex-start; /* Align main content to the left */
+            margin-left: 0; /* Set margin left to 0 */
+        }
+
+        #formResultsContainer {
+            flex: 1;
+            margin-right: 1rem; /* Reduce right margin to shift more to the left */
         }
 
         input {
@@ -152,10 +162,6 @@
             transform: translateY(-3px);
         }
     </style>
-#map {
-    height: 400px;
-}
-</style>
 </head>
 <body>
     <div class="container">
@@ -164,19 +170,21 @@
             <p>Plan your budget based on your location</p>
         </header>
 
-        <main style="display: flex; justify-content: space-between;">
+        <main style="display: flex; justify-content: flex-start;"> <!-- Align main content to the left -->
             <div id="formResultsContainer" style="flex: 1; margin-right: 2rem;">
+                
                 <form id="budgetForm">
                     <input type="number" id="totalBudget" placeholder="Enter your total budget (Rs.)" required>
                     <input type="number" id="hotelBudget" placeholder="Hotel Budget (%)" required>
                     <input type="number" id="shopBudget" placeholder="Shop Budget (%)" required>
+                    <input type="number" id="transportationBudget" placeholder="Transportation Budget (%)" required>
                     <button type="submit">Plan My Budget</button>
                 </form>
 
                 <div id="results">
-                    <h2>Nearby shops & hotels</h2>
+                    <h2>Nearby Shops & Restaurants</h2>
                     <div id="hotels">
-                        <h3>Hotels</h3>
+                        <h3>Restaurants</h3>
                         <ul id="hotelList"></ul>
                     </div>
                     <div id="shops">
@@ -185,8 +193,30 @@
                     </div>
                 </div>
 
+                <div id="transportationContainer" style="margin-top: 2rem;">
+                    <h2 style="font-size: 1.5rem; text-align: center;">Transportation Options</h2>
+                    <div id="transportationOptions" style="background-color: rgba(255, 255, 255, 0.8); color: black; padding: 1rem; border-radius: 15px; display: flex; justify-content: space-around; align-items: center; height: 80px;">
+                        <button style="padding: 0.5rem 1rem; border-radius: 10px; border: none; background-color: #4CAF50; color: white; cursor: pointer; transition: background-color 0.3s;" onclick="showTransportMenu('Auto')">Auto</button>
+                        <button style="padding: 0.5rem 1rem; border-radius: 10px; border: none; background-color: #4CAF50; color: white; cursor: pointer; transition: background-color 0.3s;" onclick="showTransportMenu('Bus')">Bus</button>
+                        <button style="padding: 0.5rem 1rem; border-radius: 10px; border: none; background-color: #4CAF50; color: white; cursor: pointer; transition: background-color 0.3s;" onclick="showTransportMenu('Cab')">Cab</button>
+                    </div>
+                </div>
+                
+                
+                
+
                 <div id="chartContainer">
                     <canvas id="budgetChart"></canvas>
+                </div>
+
+                <div id="recommendationContainer">
+                    <h2>Budget Recommendations</h2>
+                    <ul id="recommendations"></ul>
+                </div>
+
+                <div id="predictionContainer">
+                    <h2>Expense Prediction</h2>
+                    <div id="predictedExpenses"></div>
                 </div>
             </div>
 
@@ -221,9 +251,11 @@
             let totalBudget = parseFloat(document.getElementById('totalBudget').value);
             let hotelPercent = parseFloat(document.getElementById('hotelBudget').value);
             let shopPercent = parseFloat(document.getElementById('shopBudget').value);
+            let transportationPercent = parseFloat(document.getElementById('transportationBudget').value);
 
             let hotelBudget = (totalBudget * (hotelPercent / 100)).toFixed(2);
             let shopBudget = (totalBudget * (shopPercent / 100)).toFixed(2);
+            let transportationBudget = (totalBudget * (transportationPercent / 100)).toFixed(2);
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async function(position) {
@@ -232,9 +264,9 @@
                         lng: position.coords.longitude
                     };
                     await getNearbyPlaces(userLocation, hotelBudget, shopBudget);
+                    await getBudgetRecommendations(totalBudget, hotelBudget, shopBudget, transportationBudget);
+                    await predictExpenses(totalBudget, hotelBudget, shopBudget, transportationBudget);
                 });
-            } else {
-                alert("Geolocation is not supported by this browser.");
             }
         });
 
@@ -250,6 +282,8 @@
             }
             
             let data = await response.json();
+            console.log("API Data:", data);  // Log the response
+
             let hotels = data.elements.filter(place => place.tags.tourism === 'hotel');
             let shops = data.elements.filter(place => place.tags.shop);
 
@@ -257,93 +291,121 @@
         }
 
         function displayPlaces(hotels, shops, hotelBudget, shopBudget, location) {
-            const hotelList = document.getElementById('hotelList');
-            const shopList = document.getElementById('shopList');
-            hotelList.innerHTML = '';
-            shopList.innerHTML = '';
-            markers.forEach(marker => map.removeLayer(marker));
-            markers = [];
+    const hotelList = document.getElementById('hotelList');
+    const shopList = document.getElementById('shopList');
+    hotelList.innerHTML = '';
+    shopList.innerHTML = '';
+    markers.forEach(marker => map.removeLayer(marker)); // Clear existing markers
+    markers = []; // Reset markers
 
-            let bounds = L.latLngBounds([]);
+    hotels.forEach(hotel => {
+        let button = document.createElement('button');
+        button.innerText = `${hotel.tags.name} - Approx. Budget: Rs. ${hotelBudget}`;
+        button.onclick = () => showMenu(hotel.tags.name);
+        hotelList.appendChild(button);
+        addMarker(hotel, 'hotel', location);
+    });
 
-            hotels.forEach(hotel => {
-                let li = document.createElement('li');
-                li.innerText = `${hotel.tags.name} - Approx. Budget: Rs. ${hotelBudget}`;
-                hotelList.appendChild(li);
-                const marker = addMarker(hotel, 'hotel');
-                if (marker) bounds.extend(marker.getLatLng());
-            });
+    shops.forEach(shop => {
+        let button = document.createElement('button');
+        button.innerText = `${shop.tags.name} - Approx. Budget: Rs. ${shopBudget}`;
+        button.onclick = () => showMenu(shop.tags.name);
+        shopList.appendChild(button);
+        addMarker(shop, 'shop', location);
+    });
 
-            shops.forEach(shop => {
-                let li = document.createElement('li');
-                li.innerText = `${shop.tags.name} - Approx. Budget: Rs. ${shopBudget}`;
-                shopList.appendChild(li);
-                const marker = addMarker(shop, 'shop');
-                if (marker) bounds.extend(marker.getLatLng());
-            });
+    updateChart([hotelBudget, shopBudget]);
 
-            updateChart([hotelBudget, shopBudget]);
+    if (!userMarker) {
+        userMarker = L.marker([location.lat, location.lng]).addTo(map).bindPopup('You are here').openPopup();
+    }
+}
 
-            if (!userMarker) {
-                const userIcon = L.icon({
-                    iconUrl: 'https://img.icons8.com/?size=94&id=492ILERveW8G&format=png',
-                    iconSize: [30, 30]
-                });
-                userMarker = L.marker([location.lat, location.lng], { icon: userIcon }).addTo(map).bindPopup('You are here').openPopup();
-            }
-            bounds.extend([location.lat, location.lng]);
+function showMenu(placeName) {
+    // Display a menu for the selected place
+    alert(`Displaying menu for ${placeName}.`); // Replace this with your menu display logic
+}
 
-            map.fitBounds(bounds);
+
+        function addMarker(place, type, userLocation) {
+            let latLng = [place.lat, place.lon];
+            let marker = L.marker(latLng).addTo(map).bindPopup(place.tags.name);
+            markers.push(marker);
         }
 
-        function addMarker(place, type) {
-            const lat = place.lat || place.center?.[0];
-            const lon = place.lon || place.center?.[1];
-
-            let icon;
-            if (type === 'hotel') {
-                icon = L.icon({
-                    iconUrl: 'https://img.icons8.com/?size=80&id=k2H53U0hwnYM&format=png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34]
-                });
-            } else if (type === 'shop') {
-                icon = L.icon({
-                    iconUrl: 'https://img.icons8.com/?size=80&id=yDvdNSDLpjkn&format=png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34]
-                });
-            }
-
-            if (lat && lon) {
-                const marker = L.marker([lat, lon], { icon: icon }).addTo(map);
-                markers.push(marker);
-                marker.bindPopup(`${place.tags.name} (${type.charAt(0).toUpperCase() + type.slice(1)})`);
-                return marker;
-            } else {
-                console.error("Invalid coordinates for marker:", place);
-                return null;
-            }
+        function updateChart(budgetData) {
+            drawChart(budgetData[0], budgetData[1], 0); // Assuming transportation budget is not in chart
         }
 
-        function updateChart(budgets) {
+        function drawChart(hotelBudget, shopBudget, transportationBudget) {
             const ctx = document.getElementById('budgetChart').getContext('2d');
+
             if (budgetChart) {
                 budgetChart.destroy();
             }
+
             budgetChart = new Chart(ctx, {
-                type: 'doughnut',
+                type: 'pie',
                 data: {
-                    labels: ['Hotel Budget', 'Shop Budget'],
+                    labels: ['Hotel Budget', 'Shop Budget', 'Transportation Budget'],
                     datasets: [{
-                        label: 'Budget Distribution',
-                        data: budgets,
-                        backgroundColor: ['#ff6384', '#36a2eb']
+                        label: 'Budget Allocation',
+                        data: [hotelBudget, shopBudget, transportationBudget],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
                     }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Budget Allocation'
+                        }
+                    }
                 }
             });
+        }
+
+        async function getBudgetRecommendations(totalBudget, hotelBudget, shopBudget, transportationBudget) {
+            const recommendations = document.getElementById('recommendations');
+            recommendations.innerHTML = '';
+
+            if (totalBudget < 1000) {
+                recommendations.innerHTML += `<li>Consider increasing your budget for a better experience.</li>`;
+            } else {
+                recommendations.innerHTML += `<li>Your budget is adequate for a comfortable stay!</li>`;
+            }
+
+            if (hotelBudget < 1000) {
+                recommendations.innerHTML += `<li>Consider allocating more for hotels to ensure better quality.</li>`;
+            }
+
+            if (shopBudget < 500) {
+                recommendations.innerHTML += `<li>Increase your shopping budget for a better experience!</li>`;
+            }
+
+            if (transportationBudget < 500) {
+                recommendations.innerHTML += `<li>Increase your transportation budget for better convenience!</li>`;
+            }
+        }
+
+        async function predictExpenses(totalBudget, hotelBudget, shopBudget, transportationBudget) {
+            const predictedExpenses = document.getElementById('predictedExpenses');
+            predictedExpenses.innerHTML = '';
+
+            const randomExpenseFactor = Math.random() * 0.1; // Simulate a 10% variance
+            const estimatedHotelExpense = (hotelBudget * (1 + randomExpenseFactor)).toFixed(2);
+            const estimatedShopExpense = (shopBudget * (1 + randomExpenseFactor)).toFixed(2);
+            const estimatedTransportationExpense = (transportationBudget * (1 + randomExpenseFactor)).toFixed(2);
+            const totalEstimatedExpense = (parseFloat(estimatedHotelExpense) + parseFloat(estimatedShopExpense) + parseFloat(estimatedTransportationExpense)).toFixed(2);
+
+            predictedExpenses.innerHTML += `<p>Estimated Hotel Expense: Rs. ${estimatedHotelExpense}</p>`;
+            predictedExpenses.innerHTML += `<p>Estimated Shop Expense: Rs. ${estimatedShopExpense}</p>`;
+            predictedExpenses.innerHTML += `<p>Estimated Transportation Expense: Rs. ${estimatedTransportationExpense}</p>`;
+            predictedExpenses.innerHTML += `<p>Total Estimated Expense: Rs. ${totalEstimatedExpense}</p>`;
         }
     </script>
 </body>

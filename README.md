@@ -13,3 +13,19 @@ Ask AI: Our upcoming AI assistant will provide instant answers to your budgeting
 Transportation Budgeting Recommendations: Save on travel expenses with tailored advice on transportation options that fit your budget.
 Restaurant Menus: Browse menus of local restaurants right from the app to help you choose meals that suit both your palate and your wallet.
 Stay tuned for these fantastic updates and more as we continually enhance your budgeting experience. Join us today and take the first step toward smarter financial management!
+
+
+///INSTALLATION OF OPENAI
+Create a new Node.js project (if you haven't already):
+
+
+1. mkdir my-openai-project
+    cd my-openai-project
+    npm init -y
+
+2. npm install openai
+
+3. in .env file
+    OPENAI_API_KEY=your_api_key_here
+
+4. node index.js
