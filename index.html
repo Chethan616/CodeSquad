@@ -1,6 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">\
+<html lang="en">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Protest+Guerrilla&display=swap" rel="stylesheet">
+
 <head>
+
+    ...
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    ...
+
+  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enhanced OpenStreetMap Budget Planner</title>
@@ -126,6 +136,57 @@
     button:active {
       transform: translateY(0);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 90px;
+      left: 20px;
+      width: 200px;
+      height: auto;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      transform: translateX(-110%);
+      z-index: 1000;
+    }
+
+    .sidebar.active {
+      transform: translateX(0);
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .sidebar li {
+      margin-bottom: 15px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .sidebar a {
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: block;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      font-weight: 500;
+    }
+
+    .sidebar a:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
     }
 
     #askAIButton {
@@ -254,6 +315,8 @@
     <div id="formContainer">
       <form id="budgetForm">
         <input type="number" id="totalBudget" placeholder="Enter your total budget (Rs.)" required>
+        <input type="number" id="hotelBudget" placeholder="Hotel Budget (%)" required>
+        <input type="number" id="shopBudget" placeholder="Shop Budget (%)" required>
         <button type="submit">Plan My Budget</button>
       </form>
     </div>
@@ -295,12 +358,29 @@
     </div>
   </div>
 
-  <footer>
-    <p> Made by CodeSquad </p>
-  </footer>
+
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script>
+    document.getElementById('budgetForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const totalBudget = parseFloat(document.getElementById('totalBudget').value);
+      const hotelBudgetPercent = parseFloat(document.getElementById('hotelBudget').value);
+      const shopBudgetPercent = parseFloat(document.getElementById('shopBudget').value);
+
+      const hotelAmount = (hotelBudgetPercent / 100) * totalBudget;
+      const shopAmount = (shopBudgetPercent / 100) * totalBudget;
+
+      document.getElementById('hotelAmount').innerText = `Hotel Budget: Rs. ${hotelAmount.toFixed(2)}`;
+      document.getElementById('shopAmount').innerText = `Shop Budget: Rs. ${shopAmount.toFixed(2)}`;
+    });
+
+    // Sidebar toggle function
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    }
     // Initialize Three.js scene
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -316,6 +396,19 @@ const geometry = new THREE.BoxGeometry();
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
 const cube = new THREE.Mesh(geometry, material);
 scene.add(cube);
+// Initialize the map
+const map = L.map('map').setView([28.6139, 77.2090], 13); // Set your desired location coordinates (latitude, longitude)
+
+// Load and display tile layers
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap'
+}).addTo(map);
+
+// Add a marker
+const marker = L.marker([28.6139, 77.2090]).addTo(map); // Change coordinates for your location
+marker.bindPopup('<b>Hello!</b><br>This is your location.').openPopup();
+
 
 // Create another cube for the right bottom corner
 const cube2Geometry = new THREE.BoxGeometry();
@@ -354,7 +447,7 @@ animate();
 
     document.addEventListener('DOMContentLoaded', () => {
       initMap();
-      getUserLocation();
+      //getUserLocation();
     });
 
     // Sample data for hotels and shops (replace with real data or API calls)
@@ -370,13 +463,30 @@ animate();
       { name: "Street Food Corner", type: "Food", lat: 28.6289, lon: 77.2065 }
     ];
 
-    document.getElementById('budgetForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const budget = parseFloat(document.getElementById('totalBudget').value);
-      planBudget(budget);
-    });
+    document.getElementById('budgetForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-    function getUserLocation() {
+    let totalBudget = parseFloat(document.getElementById('totalBudget').value);
+    let hotelPercent = parseFloat(document.getElementById('hotelBudget').value);
+    let shopPercent = parseFloat(document.getElementById('shopBudget').value);
+
+    let hotelBudget = (totalBudget * (hotelPercent / 100)).toFixed(2);
+    let shopBudget = (totalBudget * (shopPercent / 100)).toFixed(2);
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async function(position) {
+            let userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            await getNearbyPlaces(userLocation, hotelBudget, shopBudget);
+        });
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+});
+
+function getUserLocation() {
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(function(position) {
           const lat = position.coords.latitude;
@@ -392,6 +502,51 @@ animate();
         });
       }
     }
+
+    async function getNearbyPlaces(location, hotelBudget, shopBudget) {
+    let radius = 1000;
+    let overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["tourism"="hotel"](around:${radius},${location.lat},${location.lng});node["shop"](around:${radius},${location.lat},${location.lng}););out body;`;
+
+    let response = await fetch(overpassUrl);
+    let data = await response.json();
+
+    let hotels = data.elements.filter(place => place.tags.tourism === 'hotel');
+    let shops = data.elements.filter(place => place.tags.shop);
+
+    displayPlaces(hotels, 'hotelList', hotelBudget);
+    displayPlaces(shops, 'shopList', shopBudget);
+
+    // Add markers for hotels
+    hotels.forEach(hotel => {
+        if (hotel.lat && hotel.lon) {
+            const marker = L.marker([hotel.lat, hotel.lon]).addTo(map);
+            marker.bindPopup(`${hotel.tags.name || 'Unnamed Hotel'} - Estimated Cost: Rs.${(Math.random() * hotelBudget).toFixed(2)}`);
+        }
+    });
+
+    // Add markers for shops
+    shops.forEach(shop => {
+        if (shop.lat && shop.lon) {
+            const marker = L.marker([shop.lat, shop.lon]).addTo(map);
+            marker.bindPopup(`${shop.tags.name || 'Unnamed Shop'} - Estimated Cost: Rs.${(Math.random() * shopBudget).toFixed(2)}`);
+        }
+    });
+}
+
+
+function displayPlaces(places, elementId, budget) {
+    let list = document.getElementById(elementId);
+    list.innerHTML = ''; 
+
+    places.forEach(place => {
+        let li = document.createElement('li');
+        let placeName = place.tags.name || 'Unnamed';
+        let estimatedCost = Math.random() * budget; // Example random cost
+        li.textContent = `${placeName} - Estimated Cost: Rs.${estimatedCost.toFixed(2)}`;
+        list.appendChild(li);
+    });
+}
+
 
     function planBudget(budget) {
       // Clear previous markers
@@ -433,44 +588,54 @@ animate();
       });
     }
 
-    function updateBudgetChart(budget, hotelsBudget, foodBudget, transportBudget, otherBudget) {
-      const ctx = document.getElementById('budgetChart').getContext('2d');
-      if (budgetChart) {
-        budgetChart.destroy();
-      }
-      budgetChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-          labels: ['Hotels', 'Food', 'Transport', 'Other'],
-          datasets: [{
-            label: 'Budget Distribution',
-            data: [hotelsBudget, foodBudget, transportBudget, otherBudget],
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50'],
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'bottom',
-            },
-            tooltip: {
-              callbacks: {
-                label: function(tooltipItem) {
-                  const amount = tooltipItem.raw;
-                  return `Rs. ${amount.toFixed(0)}`;
-                }
-              }
-            }
+    function updateBudgetChart(hotelsBudget, shopsBudget, foodBudget, transportBudget) {
+  const ctx = document.getElementById('budgetChart').getContext('2d');
+  if (budgetChart) {
+    budgetChart.destroy(); // Destroy previous chart to prevent duplication
+  }
+  budgetChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Hotels', 'Shops', 'Food', 'Transport'],
+      datasets: [{
+        data: [hotelsBudget, shopsBudget, foodBudget, transportBudget],
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50'],
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom', // Position legend at the bottom
+          labels: {
+            usePointStyle: true, // Makes the color bars small dots
+            boxWidth: 20, // Adjust width of the color box
+            padding: 20 // Adds padding between items
           }
         }
-      });
+      },
+      layout: {
+        padding: {
+          top: 20, // Adjusts padding above the chart
+          bottom: 50 // Adds extra padding below the chart for better visibility of the legend
+        }
+      }
     }
+  });
+}
 
-    document.getElementById('askAIButton').addEventListener('click', function() {
-      alert("AI Recommendations feature coming soon!");
+
+    // Attach event listeners for dynamic UI interactions
+    window.addEventListener('resize', () => {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
     });
+
+    // Call the budget chart function with initial dummy values (can be replaced)
+    updateBudgetChart(4000, 3000, 2000, 1000);
   </script>
+
+  <button id="askAIButton">Ask AI!</button>
 </body>
 </html>
