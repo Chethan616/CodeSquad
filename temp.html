@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-    
 <head>
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Protest+Guerrilla&display=swap" rel="stylesheet">
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +12,6 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
-    
 
     <style>
         @keyframes gradientBG {
@@ -23,174 +20,67 @@
             100% { background-position: 0% 50%; }
         }
 
-        
-        .sidebar {
-    position: fixed;
-    top: 90px;
-    left: 20px;
-    width: 250px; /* Adjust as necessary */
-    height: auto;
-    background: rgba(255, 255, 255, 0.1); /* Frosted glass effect */
-    backdrop-filter: blur(10px);
-    color: #fff;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    padding: 0; /* Set padding to 0 for better alignment */
-    border-radius: 20px; /* Softer rounded edges */
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2); /* Shadow for emphasis */
-    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    transform: translateX(-110%);
-    z-index: 1000;
-    box-sizing: border-box; /* Include padding and border in width/height calculations */
-}
-
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1001; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
-}
-
-.modal-content {
-    background-color: #fefefe; /* White background for modal content */
-    margin: 15% auto; /* 15% from the top and centered */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-
-.sidebar.active {
-    transform: translateX(0);
-    animation: menuPop 0.5s forwards;
-}
-
-.sidebar ul {
-    list-style: none;
-    padding: 10px; /* Add padding here for better spacing inside the menu */
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* Align items to the left */
-}
-
-.sidebar li {
-    margin-bottom: 10px; /* Adjusted for tighter spacing */
-    width: 100%;
-}
-
-.sidebar a {
-    color: #fff;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    padding: 15px 20px; /* Padding for menu items */
-    border-radius: 12px; /* Rounded edges for menu items */
-    background: rgba(255, 255, 255, 0.1);
-     /* Transparent background */
-    font-size: 1.1rem; /* Slightly increased font size */
-    font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-}
-.sidebar a:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3); /* Enhanced hover shadow */
-}
-.toggle-btn {
-    cursor: pointer;
-    background: var(--primary-green);
-    color: white;
-    border: 4px solid var(--dark-green); /* Thicker constant border */
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1001;
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-}
-
-.toggle-btn:hover {
-    background: var(--dark-green);
-    transform: rotate(90deg);
-    /* No changes to border or text color */
-}
-
-
-
-        @keyframes menuPop {
-            0% {
-                opacity: 0;
-                transform: translateX(-110%) scale(0.8);
-            }
-            50% {
-                opacity: 1;
-                transform: translateX(10%) scale(1.1);
-            }
-            100% {
-                opacity: 1;
-                transform: translateX(0) scale(1);
-            }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(-45deg, #5c5a5a, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: #333;
         }
 
-        .sidebar.active {
-            animation: menuPop 0.5s forwards;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
         }
 
-        .toggle-btn {
-    cursor: pointer;
-    background: var(--primary-green);
-    color: white;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    border-radius: 50px; /* Thicker constant border */
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1001;
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-}
+        header {
+            text-align: center;
+            padding: 2rem 0;
+        }
 
-.toggle-btn:hover {
-    background: var(--dark-green);
-    transform: rotate(90deg);
-    /* No changes to border or text color */
-}
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
 
-button {
+        header p {
+            font-size: 1.5rem;
+            color: #f0f0f0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        #budgetForm {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        input {
+            padding: 0.8rem;
+            border-radius: 25px;
+            border: none;
+            font-size: 1.1rem;
+            width: 250px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+
+        button {
             padding: 0.8rem 2rem;
             font-size: 1.1rem;
             border-radius: 25px;
@@ -211,145 +101,30 @@ button {
             transform: translateY(0);
         }
 
-
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(-45deg, #3f51b5, #e91e63, #2196f3, #00bcd4);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            color: #fff;
+        #map {
+            height: 400px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            margin-top: 1rem;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        header {
-            text-align: center;
-            padding: 2rem 0;
-        }
-
-        header h1 {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            animation: fadeInDown 1s ease-out;
-        }
-
-        header p {
-            font-size: 1.4rem;
-            color: #f0f0f0;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-            animation: fadeInUp 1s ease-out 0.5s both;
-        }
-
-        #budgetForm {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            animation: fadeIn 1s ease-out 1s both;
-        }
-
-        main {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-        }
-
-        #formResultsContainer {
-            flex: 1;
-            min-width: 300px;
-            margin-right: 1rem;
-        }
-        
-
-        input {
-            padding: 0.8rem;
-            border-radius: 25px;
-            border: none;
-            font-size: 1.1rem;
-            width: 100%;
-            max-width: 300px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
-            transform: translateY(-3px);
-        }
-
-
-
-        #chartMapContainer {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start; /* Align items to the top */
-    gap: 1rem; /* Adds spacing between the chart and map */
-    margin-top: 2rem; /* Adds margin above the container */
-}
-
-#chartContainer {
-    flex: 1; /* Ensures the chart takes up the same amount of space as the map */
-    max-width: 400px; /* Set a maximum width for the chart */
-    height: 300px; /* Set height for the chart */
-}
-
-#mapContainer {
-    flex: 1; /* Ensures the map takes up the same amount of space as the chart */
-    max-width: 630px; /* Set a maximum width for the map */
-    margin-top: 50px; /* Adds margin to shift the map container down */
-}
-
-#map {
-    width: 100%; /* Adjust the map width to fill the container */
-    height: 370px; /* Set the height of the map to match the chart */
-    border-radius: 15px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    animation: fadeIn 1s ease-out 0.5s both;
-}
-
-#map:hover {
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    transform: scale(1.05);
-}
-
-
-
-
-        #results, #transportationContainer, #chartContainer, #recommendationContainer, #predictionContainer {
-            margin-top: 3rem;
-            background-color: rgba(255, 255, 255, 0.1);
+        #results, #chartContainer {
+            margin-top: 2rem;
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 2rem;
             border-radius: 15px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            animation: fadeIn 1s ease-out 0.5s both;
         }
 
         #chartContainer {
             width: 100%;
-            max-width: 400px;
             height: 300px;
         }
 
         footer {
             text-align: center;
             padding: 2rem 0;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(81, 80, 80, 0.8);
             color: #fff;
             margin-top: auto;
         }
@@ -366,84 +141,30 @@ button {
             bottom: 20px;    
             right: 20px;     
             z-index: 1000;   
-            transition: all 0.3s ease;
         }
 
         #askAIButton:hover {
             background-color: #303f9f;
-            transform: translateY(-3px) scale(1.05);
+            transform: translateY(-3px);
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .place-button {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: #fff;
-            border: none;
-            padding: 0.5rem 1rem;
-            margin: 0.5rem 0;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .place-button:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        #transportationOptions button {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: #fff;
-        }
-
-        #transportationOptions button:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-
-       
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <ul>
-            <li><a href="budgetplanner.html">Home</a></li>
-            <li><a href="working.html">How It Works</a></li>
-            <li><a href="query.html">Have any query?</a></li>
-            <li><a href="about.html">About Us</a></li>
-        </ul>
-    </div>
-
-    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
     <div class="container">
         <header>
             <h1>BudgetBuddy</h1>
             <p>Plan your budget based on your location</p>
         </header>
 
-        <main>
-            <div id="formResultsContainer">
+        <main style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+            <div id="formResultsContainer" style="flex: 1; margin-right: 2rem;">
                 <form id="budgetForm">
                     <input type="number" id="totalBudget" placeholder="Enter your total budget (Rs.)" required>
                     <input type="number" id="hotelBudget" placeholder="Hotel Budget (%)" required>
                     <input type="number" id="shopBudget" placeholder="Shop Budget (%)" required>
-                    <input type="number" id="transportationBudget" placeholder="Transportation Budget (%)" required>
                     <button type="submit">Plan My Budget</button>
                 </form>
-            
+
                 <div id="results">
                     <h2>Nearby Shops & Restaurants</h2>
                     <div id="hotels">
@@ -455,52 +176,18 @@ button {
                         <ul id="shopList"></ul>
                     </div>
                 </div>
-            
-                <div id="transportationContainer">
-                    <h2>Transportation Options</h2>
-                    <div id="transportationOptions">
-                        <button onclick="showTransportMenu('Auto')">Auto</button>
-                        <button onclick="showTransportMenu('Bus')">Bus</button>
-                        <button onclick="showTransportMenu('Cab')">Cab</button>
-                    </div>
+
+                <div id="chartContainer">
+                    <canvas id="budgetChart"></canvas>
                 </div>
-            
-                <!-- Flex container for chart and map -->
-                <div id="chartMapContainer">
-                    <div id="chartContainer">
-                        <canvas id="budgetChart"></canvas>
-                    </div>
-            
-                    <div id="mapContainer">
-                        <div id="map"></div>
-                    </div>
-                </div>
-            
-                <div id="recommendationContainer">
-                    <h2>Budget Recommendations</h2>
-                    <ul id="recommendations"></ul>
-                </div>
-            
-                <div id="predictionContainer">
-                    <h2>Expense Prediction</h2>
-                    <div id="predictedExpenses"></div>
-                </div>
-                
             </div>
-            
 
+            <div id="mapContainer" style="flex: 3; min-width: 400px;">
+                <div id="map"></div>
+            </div>
         </main>
-        
     </div>
-
-    <div id="menuModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
-            <h2 id="menuTitle">Menu</h2>
-            <ul id="menuItems"></ul>
-        </div>
-    </div>
-
+  
     <button id="askAIButton" onclick="window.location.href='ai.html'">Ask AI!</button>
 
     <script>
@@ -520,21 +207,15 @@ button {
             initMap();
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initMap();
-        });
-
         document.getElementById('budgetForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             let totalBudget = parseFloat(document.getElementById('totalBudget').value);
             let hotelPercent = parseFloat(document.getElementById('hotelBudget').value);
             let shopPercent = parseFloat(document.getElementById('shopBudget').value);
-            let transportationPercent = parseFloat(document.getElementById('transportationBudget').value);
 
             let hotelBudget = (totalBudget * (hotelPercent / 100)).toFixed(2);
             let shopBudget = (totalBudget * (shopPercent / 100)).toFixed(2);
-            let transportationBudget = (totalBudget * (transportationPercent / 100)).toFixed(2);
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async function(position) {
@@ -543,16 +224,15 @@ button {
                         lng: position.coords.longitude
                     };
                     await getNearbyPlaces(userLocation, hotelBudget, shopBudget);
-                    await getBudgetRecommendations(totalBudget, hotelBudget, shopBudget, transportationBudget);
-                    await predictExpenses(totalBudget, hotelBudget, shopBudget, transportationBudget);
-                    
                 });
+            } else {
+                alert("Geolocation is not supported by this browser.");
             }
         });
 
         async function getNearbyPlaces(location, hotelBudget, shopBudget) {
-            let radius = 5000;
-            let overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["tourism"="hotel"](around:${radius},${location.lat},${location.lng});node["shop"](around:${radius},${location.lat},${location.lng}););out body;`;
+            let radius = 1000;
+            let overpassUrl = https://overpass-api.de/api/interpreter?data=[out:json];(node["tourism"="hotel"](around:${radius},${location.lat},${location.lng});node["shop"](around:${radius},${location.lat},${location.lng}););out body;;
 
             let response = await fetch(overpassUrl);
             
@@ -578,156 +258,53 @@ button {
             markers.forEach(marker => map.removeLayer(marker));
             markers = [];
 
-            hotels.forEach((hotel, index) => {
-                let button = document.createElement('button');
-                button.className = 'place-button';
-                button.innerText = `${hotel.tags.name || 'Unnamed Hotel'} - Approx. Budget: Rs. ${hotelBudget}`;
-                button.onclick = () => showMenu(hotel.tags.name || 'Unnamed Hotel');
-                hotelList.appendChild(button);
-                addMarker(hotel, 'hotel', location);
-                gsap.from(button, {opacity: 0, y: 20, duration: 0.5, delay: index * 0.1});
+            hotels.forEach(hotel => {
+                let li = document.createElement('li');
+                li.innerText = ${hotel.tags.name} - Approx. Budget: Rs. ${hotelBudget};
+                hotelList.appendChild(li);
+                addMarker(hotel, 'hotel');
             });
 
-            shops.forEach((shop, index) => {
-                let button = document.createElement('button');
-                button.className = 'place-button';
-                button.innerText = `${shop.tags.name || 'Unnamed Shop'} - Approx. Budget: Rs. ${shopBudget}`;
-                button.onclick = () => showMenu(shop.tags.name || 'Unnamed Shop');
-                shopList.appendChild(button);
-                addMarker(shop, 'shop', location);
-                gsap.from(button, {opacity: 0, y: 20, duration: 0.5, delay: index * 0.1});
+            shops.forEach(shop => {
+                let li = document.createElement('li');
+                li.innerText = ${shop.tags.name} - Approx. Budget: Rs. ${shopBudget};
+                shopList.appendChild(li);
+                addMarker(shop, 'shop');
             });
 
-            updateChart([hotelBudget, shopBudget, 0]);
+            updateChart([hotelBudget, shopBudget]);
 
             if (!userMarker) {
                 userMarker = L.marker([location.lat, location.lng]).addTo(map).bindPopup('You are here').openPopup();
             }
         }
 
-        const menus = {
-    'Hotel Grand Krishna': {
-        drinks: [
-            { name: 'Watermeellon Juice', price: 'Rs. 60' },
-            { name: 'Pineapple Juice', price: 'Rs. 60' },
-            { name: 'Mojito', price: 'Rs. 80' }
-        ],
-        meals: [
-            { name: 'Nellore Chicken biriyani', price: 'Rs. 219' },
-            { name: 'Crispy Chicken Biriyani', price: 'Rs. 249' },
-            { name: 'Hyderabadi Chicken Biriyani', price: 'Rs. 179' }
-        ]
-    },
-    'Bala Restaurant': {
-        drinks: [
-            { name: 'Sprite/Cococola/Pepsi/thumsup', price: 'Rs. 15' },
-            { name: 'sodas', price: 'Rs. 40' },
-            { name: 'Mango Milkshake', price: 'Rs. 80' }
-        ],
-        meals: [
-            { name: 'Chicken kothu paratha', price: 'Rs. 95' },
-            { name: 'Butter chicken', price: 'Rs. 106' },
-            { name: 'Chicken noodles', price: 'Rs. 110' }
-        ]
-    },
-    'Enzo': {
-        items: [
-            { name: 'Chicken bread roll', price: 'Rs. 50' },
-            { name: 'Veg bread roll', price: 'Rs. 40' },
-            { name: 'Chicken sandwich', price: 'Rs. 60' },
-            { name: 'Crispy chicken sandwich', price: 'Rs. 80' },
-            { name: 'Chicken katti roll', price: 'Rs. 60' },
-            { name: 'Veg katti roll', price: 'Rs. 50' },
-            { name: 'Onion Samosa', price: 'Rs. 10' },
-            { name: 'Choco lava cake', price: 'Rs. 50' },
-            { name: 'Chicken fry pieces', price: 'Rs. 120' }
-        ]
-    },
-    'All Maart': {
-        items: [
-            { name: 'Active Popcorn', price: 's. 25' },
-            { name: 'Lays', price: 'Rs. 20' },
-            { name: 'Kurkure', price: 'Rs. 20' },
-            { name: 'Bingo Mad angles', price: 'Rs. 10' },
-            { name: 'Tata gluco', price: 'Rs. 10' },
-            { name: 'Maggie Cup noodles', price: 'Rs. 50' },
-            { name: 'Canvins Milkshakes(Chocolate, vanilla, Strawberry)', price: 'Rs. 40' },
-            { name: 'Sting Energy Drink', price: 'Rs. 20' },
-            { name: 'Cadbury DairyMilk Crackles', price: 'Rs. 35' }
-        ]
-    }
-};
+        function addMarker(place, type) {
+            const lat = place.lat || place.center[0];
+            const lon = place.lon || place.center[1];
 
-
-
-function showMenu(placeName) {
-    const menuTitle = document.getElementById('menuTitle');
-    const menuItems = document.getElementById('menuItems');
-    
-    menuTitle.innerText = placeName; // Set the title
-    menuItems.innerHTML = ''; // Clear previous items
-
-    // Populate menu items
-    if (menus[placeName]) {
-        for (const [category, items] of Object.entries(menus[placeName])) {
-            const categoryTitle = document.createElement('h3');
-            categoryTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-            menuItems.appendChild(categoryTitle); // Add category title
-            
-            const ul = document.createElement('ul');
-            items.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = `${item.name} - ${item.price}`; // Show name and price
-                ul.appendChild(li);
-            });
-            menuItems.appendChild(ul); // Append the category list to the menu
-        }
-    }
-
-    document.getElementById('menuModal').style.display = 'block'; // Show the modal
-}
-
-
-
-// Close the modal when the user clicks on <span> (x)
-    document.getElementById('closeModal').addEventListener('click', function() {
-    document.getElementById('menuModal').style.display = 'none';
-});
-
-window.onclick = function(event) {
-    const modal = document.getElementById('menuModal');
-    if (event.target === modal) {
-        modal.style.display = 'none';
-    }
-};
-
-
-
-        function addMarker(place, type, userLocation) {
-            let latLng = [place.lat, place.lon];
-            let marker = L.marker(latLng).addTo(map).bindPopup(place.tags.name);
-            markers.push(marker);
+            if (lat && lon) {
+                const marker = L.marker([lat, lon]).addTo(map);
+                markers.push(marker);
+                marker.bindPopup(type === 'hotel' ? ${place.tags.name} (Hotel) : ${place.tags.name} (Shop));
+            } else {
+                console.error("Invalid coordinates for marker:", place);
+            }
         }
 
-        function updateChart(budgetData) {
-            drawChart(budgetData[0], budgetData[1], budgetData[2]);
-        }
-
-        function drawChart(hotelBudget, shopBudget, transportationBudget) {
+        function updateChart(budgets) {
             const ctx = document.getElementById('budgetChart').getContext('2d');
-
             if (budgetChart) {
                 budgetChart.destroy();
             }
-
             budgetChart = new Chart(ctx, {
-                type: 'doughnut',
+                type: 'pie',
                 data: {
-                    labels: ['Hotel Budget', 'Shop Budget', 'Transportation Budget'],
+                    labels: ['Hotel Budget', 'Shop Budget'],
                     datasets: [{
-                        label: 'Budget Allocation',
-                        data: [hotelBudget, shopBudget, transportationBudget],
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                        data: budgets,
+                        backgroundColor: ['#ff6384', '#36a2eb'],
+                        hoverBackgroundColor: ['#ff6384', '#36a2eb']
                     }]
                 },
                 options: {
@@ -736,99 +313,10 @@ window.onclick = function(event) {
                         legend: {
                             position: 'top',
                         },
-                        title: {
-                            display: true,
-                            text: 'Budget Allocation'
-                        }
-                    },
-                    animation: {
-                        animateScale: true,
-                        animateRotate: true
                     }
                 }
             });
         }
-
-        async function getBudgetRecommendations(totalBudget, hotelBudget, shopBudget, transportationBudget) {
-            const recommendations = document.getElementById('recommendations');
-            recommendations.innerHTML = '';
-
-            const recommendationItems = [];
-
-            if (totalBudget < 1000) {
-                recommendationItems.push('Consider increasing your budget for a better experience.');
-            } else {
-                recommendationItems.push('Your budget is adequate for a comfortable stay!');
-            }
-
-            if (hotelBudget < 1000) {
-                recommendationItems.push('Consider allocating more for hotels to ensure better quality.');
-            }
-
-            if (shopBudget < 500) {
-                recommendationItems.push('Increase your shopping budget for a better experience!');
-            }
-
-            if (transportationBudget < 500) {
-                recommendationItems.push('Increase your transportation budget for better convenience!');
-            }
-
-            recommendationItems.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.textContent = item;
-                recommendations.appendChild(li);
-                gsap.from(li, {opacity: 0, x: -20, duration: 0.5, delay: index * 0.2});
-            });
-        }
-
-        async function predictExpenses(totalBudget, hotelBudget, shopBudget, transportationBudget) {
-            const predictedExpenses = document.getElementById('predictedExpenses');
-            predictedExpenses.innerHTML = '';
-
-            const randomExpenseFactor = Math.random() * 0.1;
-            const estimatedHotelExpense = (hotelBudget * (1 + randomExpenseFactor)).toFixed(2);
-            const estimatedShopExpense = (shopBudget * (1 + randomExpenseFactor)).toFixed(2);
-            const estimatedTransportationExpense = (transportationBudget * (1 + randomExpenseFactor)).toFixed(2);
-            const totalEstimatedExpense = (parseFloat(estimatedHotelExpense) + parseFloat(estimatedShopExpense) + parseFloat(estimatedTransportationExpense)).toFixed(2);
-
-            const expenseItems = [
-                `Estimated Hotel Expense: Rs. ${estimatedHotelExpense}`,
-                `Estimated Shop Expense: Rs. ${estimatedShopExpense}`,
-                `Estimated Transportation Expense: Rs. ${estimatedTransportationExpense}`,
-                `Total Estimated Expense: Rs. ${totalEstimatedExpense}`
-            ];
-
-            expenseItems.forEach((item, index) => {
-                const p = document.createElement('p');
-                p.textContent = item;
-                predictedExpenses.appendChild(p);
-                gsap.from(p, {opacity: 0, y: 20, duration: 0.5, delay: index * 0.2});
-            });
-        }
-
-        function showTransportMenu(transportType) {
-            alert(`Showing ${transportType} options. This feature is under development.`);
-        }
-
-        function animateElements() {
-            gsap.from('#budgetForm', {opacity: 0, y: 30, duration: 1, delay: 0.5});
-            gsap.from('#map', {opacity: 0, scale: 0.9, duration: 1, delay: 1});
-            gsap.from('#results, #transportationContainer, #chartContainer, #recommendationContainer, #predictionContainer', {
-                opacity: 0,
-                y: 30,
-                duration: 1,
-                stagger: 0.2,
-                delay: 1.5
-            });
-            gsap.from('#askAIButton', {opacity: 0, scale: 0.5, duration: 1, delay: 2, ease: 'elastic.out(1, 0.5)'});
-        }
-    </script>
-    <script>
-function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('active');
-        }
-
     </script>
 </body>
 </html>

@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCcdHE1sQNOvZ65U3XUWf5IsbVzKtrUSq0",
+            authDomain: "budgetbuddy-e309f.firebaseapp.com",
+            projectId: "budgetbuddy-e309f",
+            storageBucket: "budgetbuddy-e309f.appspot.com",
+            messagingSenderId: "705165945685",
+            appId: "1:705165945685:web:6681de139ca1910cad1ddc"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In</title>
@@ -69,10 +87,26 @@
         <a href="signup.html" class="link">Create an account</a>
     </div>
 
-    <script>
-        document.getElementById('signInForm').addEventListener('submit', function(e) {
+    <script type="module">
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+        const auth = getAuth();
+
+        document.getElementById('signInForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            // Firebase authentication sign-in logic goes here
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                // Signed in
+                const user = userCredential.user;
+                console.log('User signed in:', user);
+                // Redirect to another page or show a success message
+            } catch (error) {
+                console.error('Error signing in:', error);
+                alert('Error signing in: ' + error.message);
+            }
         });
     </script>
 </body>

@@ -438,6 +438,8 @@ button {
             <div id="formResultsContainer">
                 <form id="budgetForm">
                     <input type="number" id="totalBudget" placeholder="Enter your weekly budget (Rs.)" required>
+                    <input type="number" id="hotelBudget" placeholder="Hotel Percentage" required>
+            <input type="number" id="shopBudget" placeholder="Shop Percentage" required>
                     <input type="number" id="transportationBudget" placeholder="Transportation Budget (%)" required>
 
                     <button type="submit">Plan My Budget</button>
@@ -834,7 +836,10 @@ window.onclick = function(event) {
             gsap.from('#askAIButton', {opacity: 0, scale: 0.5, duration: 1, delay: 2, ease: 'elastic.out(1, 0.5)'});
         }
     </script>
+    
     <script>
+
+        
 function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('active');

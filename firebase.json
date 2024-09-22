@@ -1,0 +1,28 @@
+{
+    "hosting": {
+      "public": "public",
+      "rewrites": [
+        {
+          "source": "/",
+          "destination": "/budgetplanner.html"
+        },
+        {
+          "source": "/working.html",
+          "destination": "/working.html"
+        },
+        {
+          "source": "/about.html",
+          "destination": "/about.html"
+        },
+        {
+          "source": "/ai.html",
+          "destination": "/ai.html"
+        },
+        {
+          "source": "/budgetplanner.html",
+          "destination": "/budgetplanner.html"
+        }
+      ]
+    }
+  }
+  
