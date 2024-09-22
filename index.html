@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     
+    
 <head>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -443,7 +444,9 @@ button {
                     <input type="number" id="transportationBudget" placeholder="Transportation Budget (%)" required>
 
                     <button type="submit">Plan My Budget</button>
+                    
                 </form>
+                
             
                 <div id="results">
                     <h2>Nearby Shops & Restaurants</h2>
@@ -550,7 +553,6 @@ button {
     }
 });
 
-
 async function getNearbyPlaces(location, hotelBudget, shopBudget, transportationBudget) {
     let radius = 5000;
     let overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["tourism"="hotel"](around:${radius},${location.lat},${location.lng});node["shop"](around:${radius},${location.lat},${location.lng}););out body;`;
@@ -568,12 +570,14 @@ async function getNearbyPlaces(location, hotelBudget, shopBudget, transportation
         let hotels = data.elements.filter(place => place.tags.tourism === 'hotel');
         let shops = data.elements.filter(place => place.tags.shop);
 
-        displayPlaces(hotels, 'hotelList', hotelBudget);
-        displayPlaces(shops, 'shopList', shopBudget);
-        displayTransportationOptions(transportationBudget); // Call to display transportation options
+        displayPlaces(hotels, shops, hotelBudget, shopBudget, location);
+        
+        // Center the map on user's location
+        map.setView([location.lat, location.lng], 13); // Adjust the zoom level as needed
+
+        displayTransportationOptions(transportationBudget);
     } catch (error) {
-        console.error(error);
-        alert("Failed to retrieve nearby places. Please try again later.");
+        
     }
 }
 
@@ -616,6 +620,7 @@ function displayPlaces(hotels, shops, hotelBudget, shopBudget, location) {
         userMarker = L.marker([location.lat, location.lng]).addTo(map).bindPopup('You are here').openPopup();
     }
 }
+
 
 
         const menus = {
@@ -723,101 +728,122 @@ window.onclick = function(event) {
         }
 
         function updateChart(budgetData) {
-            drawChart(budgetData[0], budgetData[1], budgetData[2]);
-        }
+    drawChart(budgetData[0], budgetData[1], budgetData[2]); // Include transportation budget
+}
 
         function drawChart(hotelBudget, shopBudget, transportationBudget) {
-            const ctx = document.getElementById('budgetChart').getContext('2d');
+    const ctx = document.getElementById('budgetChart').getContext('2d');
 
-            if (budgetChart) {
-                budgetChart.destroy();
-            }
+    if (budgetChart) {
+        budgetChart.destroy();
+    }
 
-            budgetChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Hotel Budget', 'Shop Budget', 'Transportation Budget'],
-                    datasets: [{
-                        label: 'Budget Allocation',
-                        data: [hotelBudget, shopBudget, transportationBudget],
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
-                    }]
+    budgetChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Hotel Budget', 'Shop Budget', 'Transportation Budget'], // Add transportation label
+            datasets: [{
+                label: 'Budget Allocation',
+                data: [hotelBudget, shopBudget, transportationBudget], // Add transportation data
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'] // Colors for each section
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Budget Allocation'
-                        }
-                    },
-                    animation: {
-                        animateScale: true,
-                        animateRotate: true
-                    }
+                title: {
+                    display: true,
+                    text: 'Budget Allocation'
                 }
-            });
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            }
         }
+    });
+}
 
-        async function getBudgetRecommendations(totalBudget, hotelBudget, shopBudget, transportationBudget) {
-            const recommendations = document.getElementById('recommendations');
-            recommendations.innerHTML = '';
+async function getBudgetRecommendations(totalBudget, hotelBudget, shopBudget, transportationBudget) {
+    const recommendations = document.getElementById('recommendations');
+    recommendations.innerHTML = ''; // Clear previous recommendations
 
-            const recommendationItems = [];
+    // Debugging: Log values to check if they are correct
+    console.log('Total Budget:', totalBudget);
+    console.log('Hotel Budget:', hotelBudget);
+    console.log('Shop Budget:', shopBudget);
+    console.log('Transportation Budget:', transportationBudget);
 
-            if (totalBudget < 1000) {
-                recommendationItems.push('Consider increasing your budget for a better experience.');
-            } else {
-                recommendationItems.push('Your budget is adequate for a comfortable stay!');
-            }
+    const recommendationItems = [];
 
-            if (hotelBudget < 1000) {
-                recommendationItems.push('Consider allocating more for hotels to ensure better quality.');
-            }
+    // Check the total budget
+    if (totalBudget < 1000) {
+        recommendationItems.push('Consider increasing your budget for a better experience.');
+    } else {
+        recommendationItems.push('Your budget is adequate for a comfortable stay!');
+    }
 
-            if (shopBudget < 500) {
-                recommendationItems.push('Increase your shopping budget for a better experience!');
-            }
+    // Check individual budgets
+    if (hotelBudget < 1000) {
+        recommendationItems.push('Consider allocating more for hotels to ensure better quality.');
+    }
 
-            if (transportationBudget < 500) {
-                recommendationItems.push('Increase your transportation budget for better convenience!');
-            }
+    if (shopBudget < 500) {
+        recommendationItems.push('Increase your shopping budget for a better experience!');
+    }
 
-            recommendationItems.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.textContent = item;
-                recommendations.appendChild(li);
-                gsap.from(li, {opacity: 0, x: -20, duration: 0.5, delay: index * 0.2});
-            });
-        }
+    if (transportationBudget < 500) {
+        recommendationItems.push('Increase your transportation budget for better convenience!');
+    }
 
-        async function predictExpenses(totalBudget, hotelBudget, shopBudget, transportationBudget) {
-            const predictedExpenses = document.getElementById('predictedExpenses');
-            predictedExpenses.innerHTML = '';
+    // Display recommendations
+    recommendationItems.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        recommendations.appendChild(li);
+        gsap.from(li, { opacity: 0, x: -20, duration: 0.5, delay: index * 0.2 });
+    });
+}
 
-            const randomExpenseFactor = Math.random() * 0.1;
-            const estimatedHotelExpense = (hotelBudget * (1 + randomExpenseFactor)).toFixed(2);
-            const estimatedShopExpense = (shopBudget * (1 + randomExpenseFactor)).toFixed(2);
-            const estimatedTransportationExpense = (transportationBudget * (1 + randomExpenseFactor)).toFixed(2);
-            const totalEstimatedExpense = (parseFloat(estimatedHotelExpense) + parseFloat(estimatedShopExpense) + parseFloat(estimatedTransportationExpense)).toFixed(2);
+async function predictExpenses(totalBudget, hotelBudget, shopBudget, transportationBudget) {
+    const predictedExpenses = document.getElementById('predictedExpenses');
+    predictedExpenses.innerHTML = ''; // Clear previous predictions
 
-            const expenseItems = [
-                `Estimated Hotel Expense: Rs. ${estimatedHotelExpense}`,
-                `Estimated Shop Expense: Rs. ${estimatedShopExpense}`,
-                `Estimated Transportation Expense: Rs. ${estimatedTransportationExpense}`,
-                `Total Estimated Expense: Rs. ${totalEstimatedExpense}`
-            ];
+    // Debugging: Log values to check if they are correct
+    console.log('Total Budget:', totalBudget);
+    console.log('Hotel Budget:', hotelBudget);
+    console.log('Shop Budget:', shopBudget);
+    console.log('Transportation Budget:', transportationBudget);
 
-            expenseItems.forEach((item, index) => {
-                const p = document.createElement('p');
-                p.textContent = item;
-                predictedExpenses.appendChild(p);
-                gsap.from(p, {opacity: 0, y: 20, duration: 0.5, delay: index * 0.2});
-            });
-        }
+    const randomExpenseFactor = Math.random() * 0.1; // Add a random factor to simulate prediction
+    const estimatedHotelExpense = (hotelBudget * (1 + randomExpenseFactor)).toFixed(2);
+    const estimatedShopExpense = (shopBudget * (1 + randomExpenseFactor)).toFixed(2);
+    const estimatedTransportationExpense = (transportationBudget * (1 + randomExpenseFactor)).toFixed(2);
+    const totalEstimatedExpense = (
+        parseFloat(estimatedHotelExpense) +
+        parseFloat(estimatedShopExpense) +
+        parseFloat(estimatedTransportationExpense)
+    ).toFixed(2);
+
+    const expenseItems = [
+        `Estimated Hotel Expense: Rs. ${estimatedHotelExpense}`,
+        `Estimated Shop Expense: Rs. ${estimatedShopExpense}`,
+        `Estimated Transportation Expense: Rs. ${estimatedTransportationExpense}`,
+        `Total Estimated Expense: Rs. ${totalEstimatedExpense}`
+    ];
+
+    // Display predicted expenses
+    expenseItems.forEach((item, index) => {
+        const p = document.createElement('p');
+        p.textContent = item;
+        predictedExpenses.appendChild(p);
+        gsap.from(p, { opacity: 0, y: 20, duration: 0.5, delay: index * 0.2 });
+    });
+}
+
 
         function showTransportMenu(transportType) {
             alert(`Showing ${transportType} options. This feature is under development.`);
@@ -835,7 +861,11 @@ window.onclick = function(event) {
             });
             gsap.from('#askAIButton', {opacity: 0, scale: 0.5, duration: 1, delay: 2, ease: 'elastic.out(1, 0.5)'});
         }
+        getBudgetRecommendations(totalBudget, hotelBudget, shopBudget, transportationBudget);
+predictExpenses(totalBudget, hotelBudget, shopBudget, transportationBudget);
+
     </script>
+    
     
     <script>
 

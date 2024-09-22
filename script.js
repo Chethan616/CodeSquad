@@ -41,12 +41,13 @@ async function getNearbyPlaces(location, hotelBudget, shopBudget) {
         displayPlaces(shops, 'shopList', shopBudget);
     } catch (error) {
         console.error("Failed to fetch nearby places: ", error);
+        alert("Could not fetch nearby places. Please try again.");
     }
 }
 
 function displayPlaces(places, elementId, budget) {
     let list = document.getElementById(elementId);
-    list.innerHTML = ''; 
+    list.innerHTML = '';
 
     places.forEach(place => {
         let li = document.createElement('li');
@@ -67,9 +68,17 @@ function initMap(location) {
     L.marker([location.lat, location.lng]).addTo(map).bindPopup("You are here!").openPopup();
 }
 
+let myPieChart;
+
 function createPieChart(hotelBudget, shopBudget) {
     const ctx = document.getElementById('chartContainer').getContext('2d');
-    const myPieChart = new Chart(ctx, {
+    
+    // Destroy existing chart if it exists
+    if (myPieChart) {
+        myPieChart.destroy();
+    }
+
+    myPieChart = new Chart(ctx, {
         type: 'pie',
         data: {
             labels: ['Hotel Budget', 'Shop Budget'],
