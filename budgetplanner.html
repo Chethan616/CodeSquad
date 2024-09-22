@@ -17,6 +17,8 @@
             100% { background-position: 0% 50%; }
         }
 
+
+
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(-45deg, #4A0E4E, #81267D, #4169E1, #00BFFF);
@@ -30,6 +32,32 @@
             color: white;
             overflow-x: hidden;
         }
+
+        .button-container {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+    margin-top: 20px; /* Space above the button container */
+}
+
+.custom-button {
+    background-color: #4CAF50; /* Green background */
+    border: none;
+    color: white; /* White text */
+    padding: 15px 32px; /* Top/bottom and left/right padding */
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px; /* Font size */
+    margin: 4px 2px; /* Margin around buttons */
+    cursor: pointer; /* Pointer cursor on hover */
+    border-radius: 4px; /* Rounded corners */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+.custom-button:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
 
         .container {
             max-width: 1200px;
@@ -408,6 +436,42 @@
             animation: float 10s infinite ease-in-out;
         }
 
+        .modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px; /* Could be more or less, depending on screen size */
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
         @keyframes ripple {
             to {
                 transform: scale(4);
@@ -427,6 +491,12 @@
     </div>
 
     <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+    <div class="button-container">
+        <button class="custom-button" onclick="signIn()">Sign In</button>
+        <button class="custom-button" onclick="signUp()">Sign Up</button>
+    </div>
+    
+    
 
     <div class="scene">
         <div class="cube">
@@ -438,6 +508,31 @@
             <div class="bottom">Grow</div>
         </div>
     </div>
+
+    <div id="signInModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('signInModal')">&times;</span>
+            <h2>Sign In</h2>
+            <form id="signInForm">
+                <input type="email" placeholder="Email" required />
+                <input type="password" placeholder="Password" required />
+                <button type="submit">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="signUpModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('signUpModal')">&times;</span>
+            <h2>Sign Up</h2>
+            <form id="signUpForm">
+                <input type="email" placeholder="Email" required />
+                <input type="password" placeholder="Password" required />
+                <button type="submit">Sign Up</button>
+            </form>
+        </div>
+    </div>
+    
 
     <div class="background-objects">
         <div class="background-object" style="top: 10%; left: 5%;">💰</div>
@@ -497,6 +592,66 @@
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('active');
         }
+
+
+        function signIn() {
+    window.location.href = 'signin.html';
+}
+
+function signUp() {
+    window.location.href = 'signup.html';
+}
+
+
+        // Function to close the modal
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
+}
+
+// Open sign-in modal
+function openSignIn() {
+    document.getElementById("signInModal").style.display = "block";
+}
+
+// Open sign-up modal
+function openSignUp() {
+    document.getElementById("signUpModal").style.display = "block";
+}
+
+// Sign In Functionality
+document.getElementById("signInForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const email = this[0].value;
+    const password = this[1].value;
+    
+    firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            alert("Sign In Successful!");
+            closeModal('signInModal');
+            // Redirect or update UI
+        })
+        .catch((error) => {
+            alert("Error: " + error.message);
+        });
+});
+
+// Sign Up Functionality
+document.getElementById("signUpForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const email = this[0].value;
+    const password = this[1].value;
+    
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            alert("Sign Up Successful!");
+            closeModal('signUpModal');
+            // Redirect or update UI
+        })
+        .catch((error) => {
+            alert("Error: " + error.message);
+        });
+});
+
     </script>
 </body>
 </html>
