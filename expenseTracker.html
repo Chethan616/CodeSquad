@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #3f51b5, #e91e63, #2196f3, #00bcd4);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        #expenseTracker {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+        }
+
+        .expense-item {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="expenseTracker">
+        <h2>Log Your Expenses</h2>
+        <form id="expenseForm">
+            <input type="number" id="expenseAmount" placeholder="Amount (Rs.)" required>
+            <select id="expenseCategory" required>
+                <option value="">Select Category</option>
+                <option value="food">Food</option>
+                <option value="transportation">Transportation</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="other">Other</option>
+            </select>
+            <input type="text" id="expenseDescription" placeholder="Description (optional)">
+            <button type="submit">Add Expense</button>
+        </form>
+        <div id="expenseList"></div> <!-- Display logged expenses here -->
+    </div>
+
+    <script>
+        const expenses = []; // Array to store logged expenses
+
+        document.getElementById('expenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const category = document.getElementById('expenseCategory').value;
+            const description = document.getElementById('expenseDescription').value || "No description";
+
+            // Create an expense object
+            const expense = {
+                amount: amount,
+                category: category,
+                description: description,
+                date: new Date().toLocaleDateString() // Current date
+            };
+
+            // Add the expense to the array
+            expenses.push(expense);
+
+            // Clear the input fields
+            document.getElementById('expenseAmount').value = '';
+            document.getElementById('expenseCategory').value = '';
+            document.getElementById('expenseDescription').value = '';
+
+            // Display the updated expense list
+            displayExpenses();
+        });
+
+        function displayExpenses() {
+            const expenseList = document.getElementById('expenseList');
+            expenseList.innerHTML = ''; // Clear previous expenses
+
+            // Iterate over expenses and display them
+            expenses.forEach((expense, index) => {
+                const expenseItem = document.createElement('div');
+                expenseItem.className = 'expense-item';
+                expenseItem.innerHTML = `
+                    <p><strong>Amount:</strong> Rs. ${expense.amount}</p>
+                    <p><strong>Category:</strong> ${expense.category}</p>
+                    <p><strong>Description:</strong> ${expense.description}</p>
+                    <p><strong>Date:</strong> ${expense.date}</p>
+                    <button onclick="removeExpense(${index})">Remove</button>
+                `;
+                expenseList.appendChild(expenseItem);
+            });
+        }
+
+        function removeExpense(index) {
+            expenses.splice(index, 1); // Remove the expense from the array
+            displayExpenses(); // Update the displayed list
+        }
+
+        // Load expenses from local storage
+        window.onload = function() {
+            const storedExpenses = JSON.parse(localStorage.getItem('expenses'));
+            if (storedExpenses) {
+                expenses.push(...storedExpenses);
+                displayExpenses();
+            }
+        };
+    </script>
+</body>
+</html>

@@ -3,38 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Interface</title>
+    <title>AI Question Answering</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #4A0E4E, #81267D, #4169E1, #00BFFF);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
         }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
         h1 {
             text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
         }
-        #aiResponse {
-            margin-top: 20px;
+
+        input[type="text"], button {
+            width: 100%;
             padding: 10px;
-            background-color: #fff;
+            margin: 10px 0;
             border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border: none;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #response {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #f0f0f0;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
     </style>
 </head>
 <body>
-    <h1>Ask AI</h1>
-    <textarea id="userInput" placeholder="Type your question here..." rows="4" style="width: 100%;"></textarea>
-    <button id="askButton">Ask</button>
-    
-    <div id="aiResponse"></div>
+    <div class="container">
+        <h1>Ask a Question</h1>
+        <input type="text" id="userQuestion" placeholder="Type your question here..." />
+        <button onclick="askAI()">Ask AI</button>
+        <div id="response"></div>
+        <!-- Go Back Button -->
+        <button onclick="goBack()">Go Back</button>
+    </div>
 
     <script>
-        document.getElementById('askButton').addEventListener('click', () => {
-            const userInput = document.getElementById('userInput').value;
-            // Here, you can handle the AI response logic.
-            document.getElementById('aiResponse').innerText = "AI response for: " + userInput;
-        });
+    async function askAI() {
+        const question = document.getElementById('userQuestion').value;
+        const responseDiv = document.getElementById('response');
+
+        if (!question) {
+            responseDiv.innerHTML = "Please enter a question!";
+            return;
+        }
+
+        // Make an API call to Cohere
+        try {
+            const response = await fetch('https://api.cohere.ai/v1/generate', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer pQiBtwYWh3McP4Z3ZnN7846R8vMhPcWjKeedWnyG', // Your API key
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: 'command-light', // Use this model for free API tier
+                    prompt: `Question: ${question}\nAnswer:`,
+                    max_tokens: 50,
+                    temperature: 0.7
+                })
+            });
+
+            const data = await response.json();
+
+            // Log the entire response for debugging
+            console.log('API Response:', data);
+
+            if (data && data.generations && data.generations.length > 0) {
+                responseDiv.innerHTML = `AI: ${data.generations[0].text.trim()}`;
+            } else {
+                responseDiv.innerHTML = "Sorry, I couldn't get an answer.";
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            responseDiv.innerHTML = "An error occurred while fetching the answer.";
+        }
+    }
+
+    // Function to go back to the budgetplanner.html page
+    function goBack() {
+        window.location.href = 'budgetplanner.html'; // Redirect to budgetplanner.html
+    }
     </script>
 </body>
 </html>

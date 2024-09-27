@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Travel Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #3f51b5, #e91e63, #2196f3, #00bcd4);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            color: black;
+        }
+
+        h1, h3 {
+            text-align: center;
+        }
+
+        label, input, select, button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 10px;
+            background-color: #f9f9f9;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #map {
+            height: 300px;
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Group Travel Planner</h1>
+    <h3>Find Nearby Restaurants & Hotels</h3>
+    <button onclick="getNearbyPlaces()">Get Nearby Places</button>
+
+    <div id="map"></div>
+
+    <h3>Restaurants</h3>
+    <ul id="restaurantList"></ul>
+
+    <h3>Hotels</h3>
+    <ul id="hotelList"></ul>
+
+    <div id="transportRecommendation" class="result"></div>
+    <div id="transportCost" class="result"></div>
+
+    <h3>Add Friends</h3>
+    <input type="text" id="friendName" placeholder="Friend's Name" />
+    <button onclick="addFriend()">Add Friend</button>
+    <ul id="friendList"></ul>
+
+    <div id="splitCost" class="result"></div>
+</div>
+
+<script>
+let friends = [];
+let map;
+let userLocation;
+
+// Initialize the map and set user location
+function initMap(lat = 28.6139, lon = 77.2090) {
+    map = L.map('map').setView([lat, lon], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+}
+
+// Fetch nearby restaurants and hotels using OpenStreetMap (Overpass API)
+async function getNearbyPlaces() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            userLocation = { lat, lon };
+            map.setView([lat, lon], 13);
+            L.marker([lat, lon]).addTo(map).bindPopup("You are here").openPopup();
+
+            const radius = 5000;  // 5 km radius
+            const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["amenity"="restaurant"](around:${radius},${lat},${lon});node["tourism"="hotel"](around:${radius},${lat},${lon}););out body;`;
+
+            try {
+                const response = await fetch(overpassUrl);
+                const data = await response.json();
+
+                const restaurants = data.elements.filter(place => place.tags.amenity === 'restaurant');
+                const hotels = data.elements.filter(place => place.tags.tourism === 'hotel');
+                displayPlaces(restaurants, hotels, userLocation);
+            } catch (error) {
+                console.error("Error fetching nearby places:", error);
+            }
+        });
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+}
+
+// Display fetched restaurants and hotels on the map and in the list
+function displayPlaces(restaurants, hotels, userLocation) {
+    const restaurantList = document.getElementById('restaurantList');
+    const hotelList = document.getElementById('hotelList');
+
+    restaurantList.innerHTML = '';
+    hotelList.innerHTML = '';
+
+    restaurants.forEach(restaurant => {
+        const distance = calculateDistance(userLocation, { lat: restaurant.lat, lon: restaurant.lon });
+        const li = document.createElement('li');
+        li.innerText = `${restaurant.tags.name || 'Unnamed Restaurant'} - Distance: ${distance.toFixed(2)} km`;
+        li.addEventListener('click', () => recommendTransport(distance));
+        restaurantList.appendChild(li);
+        addMarker(restaurant.lat, restaurant.lon, restaurant.tags.name || 'Unnamed Restaurant');
+    });
+
+    hotels.forEach(hotel => {
+        const distance = calculateDistance(userLocation, { lat: hotel.lat, lon: hotel.lon });
+        const li = document.createElement('li');
+        li.innerText = `${hotel.tags.name || 'Unnamed Hotel'} - Distance: ${distance.toFixed(2)} km`;
+        li.addEventListener('click', () => recommendTransport(distance));
+        hotelList.appendChild(li);
+        addMarker(hotel.lat, hotel.lon, hotel.tags.name || 'Unnamed Hotel');
+    });
+}
+
+// Add marker on map
+function addMarker(lat, lon, name) {
+    L.marker([lat, lon]).addTo(map).bindPopup(name);
+}
+
+// Calculate the distance between two coordinates (Haversine formula)
+function calculateDistance(loc1, loc2) {
+    const R = 6371; // Radius of the Earth in km
+    const dLat = (loc2.lat - loc1.lat) * (Math.PI / 180);
+    const dLon = (loc2.lon - loc1.lon) * (Math.PI / 180);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(loc1.lat * (Math.PI / 180)) * Math.cos(loc2.lat * (Math.PI / 180)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+// Recommend mode of transport based on distance
+function recommendTransport(distance) {
+    const transportDiv = document.getElementById('transportRecommendation');
+    const costDiv = document.getElementById('transportCost');
+
+    if (distance < 3) {
+        transportDiv.innerText = `Recommended: Walk (Distance: ${distance.toFixed(2)} km)`;
+        costDiv.innerText = `No transportation cost required.`;
+    } else {
+        const mode = prompt('Enter mode of transport (Car, Auto, Bus):');
+        const cost = calculateTransportCost(distance, mode);
+        transportDiv.innerText = `Recommended: ${mode} (Distance: ${distance.toFixed(2)} km)`;
+        costDiv.innerText = `Estimated Transport Cost: ₹${cost.toFixed(2)}`;
+        splitCostAmongFriends(cost);
+    }
+}
+
+// Calculate transport cost based on distance and mode
+function calculateTransportCost(distance, mode) {
+    let costPerKm;
+    switch (mode.toLowerCase()) {
+        case 'car':
+            costPerKm = 10;
+            break;
+        case 'auto':
+            costPerKm = 8;
+            break;
+        case 'bus':
+            costPerKm = 5;
+            break;
+        default:
+            costPerKm = 0;
+    }
+    return distance * costPerKm;
+}
+
+// Add a friend to the list
+function addFriend() {
+    const friendName = document.getElementById('friendName').value;
+    if (friendName) {
+        friends.push(friendName);
+        updateFriendList();
+    }
+}
+
+// Update the friend list display
+function updateFriendList() {
+    const friendList = document.getElementById('friendList');
+    friendList.innerHTML = '';
+    friends.forEach(friend => {
+        const li = document.createElement('li');
+        li.innerText = friend;
+        friendList.appendChild(li);
+    });
+}
+
+// Split transportation cost among friends
+function splitCostAmongFriends(cost) {
+    const splitCostDiv = document.getElementById('splitCost');
+    const perPersonCost = (cost / (friends.length || 1)).toFixed(2);
+    splitCostDiv.innerText = `Total Cost: ₹${cost.toFixed(2)} | Each friend pays: ₹${perPersonCost}`;
+}
+
+// Initialize the map
+document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add and Manage Friends</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label, input, button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 10px;
+            background-color: #f9f9f9;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li button {
+            background-color: #e74c3c;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
+
+        li button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Add and Manage Friends</h1>
+
+    <label for="friendName">Friend's Name</label>
+    <input type="text" id="friendName" placeholder="Enter friend's name" />
+
+    <button onclick="addFriend()">Add Friend</button>
+
+    <h3>Friends List</h3>
+    <ul id="friendList"></ul>
+</div>
+
+<script type="module">
+    // Firebase Configuration
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCcdHE1sQNOvZ65U3XUWf5IsbVzKtrUSq0",
+        authDomain: "budgetbuddy-e309f.firebaseapp.com",
+        projectId: "budgetbuddy-e309f",
+        storageBucket: "budgetbuddy-e309f.appspot.com",
+        messagingSenderId: "705165945685",
+        appId: "1:705165945685:web:6681de139ca1910cad1ddc"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore(app);
+
+    let currentUser;
+
+    // Check if a user is logged in
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            console.log("User is logged in:", user);
+            fetchFriends();
+        } else {
+            console.log("No user is logged in");
+            alert("Please log in to manage your friends.");
+        }
+    });
+
+    // Add a friend to Firestore
+    async function addFriend() {
+        const friendName = document.getElementById('friendName').value;
+        if (friendName && currentUser) {
+            try {
+                await addDoc(collection(db, "users", currentUser.uid, "friends"), {
+                    name: friendName
+                });
+                document.getElementById('friendName').value = ''; // Clear input
+                fetchFriends(); // Refresh the list
+            } catch (e) {
+                console.error("Error adding friend:", e);
+            }
+        } else {
+            alert("Please enter a friend's name.");
+        }
+    }
+
+    // Fetch friends from Firestore
+    async function fetchFriends() {
+        if (!currentUser) return;
+        const friendList = document.getElementById('friendList');
+        friendList.innerHTML = '';
+
+        try {
+            const querySnapshot = await getDocs(collection(db, "users", currentUser.uid, "friends"));
+            querySnapshot.forEach((doc) => {
+                const friend = doc.data();
+                const li = document.createElement('li');
+                li.innerHTML = `${friend.name} <button onclick="removeFriend('${doc.id}')">Remove</button>`;
+                friendList.appendChild(li);
+            });
+        } catch (e) {
+            console.error("Error fetching friends:", e);
+        }
+    }
+
+    // Remove a friend from Firestore
+    async function removeFriend(friendId) {
+        if (!currentUser) return;
+        try {
+            await deleteDoc(doc(db, "users", currentUser.uid, "friends", friendId));
+            fetchFriends(); // Refresh the list after removing
+        } catch (e) {
+            console.error("Error removing friend:", e);
+        }
+    }
+</script>
+
+</body>
+</html>
